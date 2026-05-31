@@ -72,3 +72,54 @@ body {
 .border-3 {
   border-width: 3px;
 }
+
+/* ── RoomieLedger design tokens ── */
+:root {
+  --rl-teal: #0d9488;
+  --rl-teal-dark: #0f766e;
+  --rl-teal-light: #f0fdfa;
+  --rl-teal-border: #99f6e4;
+
+  --rl-red: #ef4444;
+  --rl-red-light: #fef2f2;
+  --rl-red-border: #fecaca;
+
+  --rl-green: #10b981;
+  --rl-green-light: #f0fdf4;
+
+  --rl-amber: #f59e0b;
+
+  --rl-ink: #1a1a2e;
+  --rl-ink-secondary: #64748b;
+  --rl-ink-muted: #94a3b8;
+  --rl-border: #e8edf2;
+  --rl-bg: #f8fafc;
+  --rl-card: #ffffff;
+
+  --rl-radius-card: 14px;
+  --rl-radius-pill: 20px;
+  --rl-radius-sheet: 22px;
+  --rl-shadow-card: 0 1px 6px rgba(0, 0, 0, 0.06);
+  --rl-shadow-strong: 0 4px 16px rgba(13, 148, 136, 0.35);
+}
+
+@keyframes rl-slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.rl-sheet-enter {
+  animation: rl-slide-up 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+@keyframes rl-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.rl-overlay-enter {
+  animation: rl-fade-in 0.2s ease forwards;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
