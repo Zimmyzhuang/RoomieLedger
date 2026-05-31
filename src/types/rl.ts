@@ -4,6 +4,8 @@ export interface GroupDTO {
   emoji: string
   memberCount: number
   unsettledDebtCount: number
+  /** Positive = owed to you, negative = you owe (cents). */
+  yourNetCents: number
 }
 
 export interface GroupDebtDTO {

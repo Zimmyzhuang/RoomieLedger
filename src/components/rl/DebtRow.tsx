@@ -6,33 +6,27 @@ interface Props {
 }
 
 export function DebtRow({ debt }: Props) {
+  const label = `${debt.fromName} owes ${debt.toName} ${formatCurrency(debt.amountCents)}`
+
   return (
-    <div
-      className="bg-white rounded-[16px] p-[12px_14px] flex items-center gap-[10px]"
-      style={{ boxShadow: 'var(--rl-shadow-card)' }}
-    >
-      <div
-        className="w-[36px] h-[36px] rounded-full flex items-center justify-center text-[14px] font-extrabold text-white flex-shrink-0"
-        style={{ background: debt.fromColor }}
-      >
+    <article className="rl-card rl-list-row" aria-label={label}>
+      <div className="rl-avatar rl-avatar-sm" aria-hidden="true" style={{ background: debt.fromColor }}>
         {debt.fromName[0]}
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-bold text-[var(--rl-ink)] leading-tight">
+      <div className="flex-1 min-w-0 text-center">
+        <p className="rl-body font-semibold leading-snug">
           <span>{debt.fromName}</span>
-          <span className="text-[var(--rl-ink-muted)] font-semibold"> owes </span>
+          <span className="rl-caption font-medium"> owes </span>
           <span>{debt.toName}</span>
         </p>
-        <p className="text-[10px] font-semibold mt-[2px]" style={{ color: 'var(--rl-red)' }}>
+        <p className="rl-amount rl-amount-negative mt-1">
+          <span className="rl-sr-only">Amount: </span>
           {formatCurrency(debt.amountCents)}
         </p>
       </div>
-      <div
-        className="w-[36px] h-[36px] rounded-full flex items-center justify-center text-[14px] font-extrabold text-white flex-shrink-0"
-        style={{ background: debt.toColor }}
-      >
+      <div className="rl-avatar rl-avatar-sm" aria-hidden="true" style={{ background: debt.toColor }}>
         {debt.toName[0]}
       </div>
-    </div>
+    </article>
   )
 }

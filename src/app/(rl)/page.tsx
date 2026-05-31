@@ -1,32 +1,30 @@
+import { Suspense } from 'react'
+import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/rl/db'
 import { getGroupsList } from '@/lib/rl/getGroups'
-import { GroupCard } from '@/components/rl/GroupCard'
-import { EmptyState } from '@/components/rl/EmptyState'
+import { getGroupDashboard } from '@/lib/rl/getGroupDashboard'
+import { MyGroups } from '@/components/rl/MyGroups'
 import { SetupRequired } from '@/components/rl/SetupRequired'
 
-export default async function GroupsPage() {
+interface Props {
+  searchParams: Promise<{ g?: string }>
+}
+
+export default async function MyGroupsPage({ searchParams }: Props) {
+  const { g } = await searchParams
   const groupCount = await prisma.group.count()
   if (groupCount === 0) return <SetupRequired />
 
   const groups = await getGroupsList()
+  if (!g && groups[0]) redirect(`/?g=${groups[0].id}`)
+
+  const activeGroupId = g && groups.some((x) => x.id === g) ? g : groups[0].id
+  const dashboard = await getGroupDashboard(activeGroupId)
+  if (!dashboard) return <SetupRequired />
 
   return (
-    <div className="flex flex-col flex-1">
-      <div className="flex-shrink-0 rl-edge-bleed pt-2 pb-6" style={{ background: 'linear-gradient(150deg, #0d9488 0%, #0f766e 100%)' }}>
-        <p className="text-[11px] font-medium text-white/80">RoomieLedger</p>
-        <p className="text-[11px] text-white/75 mt-1">Tap a group to see who owes who</p>
-      </div>
-
-      <div className="flex-1 pt-4 pb-4 flex flex-col gap-3">
-        {groups.length === 0 ? (
-          <EmptyState
-            title="No groups yet"
-            subtitle="Run npm run db:seed to load sample groups."
-          />
-        ) : (
-          groups.map((g) => <GroupCard key={g.id} group={g} />)
-        )}
-      </div>
-    </div>
+    <Suspense fallback={<div className="flex-1 p-4 text-[var(--rl-ink-muted)] text-sm">Loading…</div>}>
+      <MyGroups groups={groups} activeGroupId={activeGroupId} dashboard={dashboard} />
+    </Suspense>
   )
 }

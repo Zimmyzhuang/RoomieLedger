@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/rl/db'
 import { getMe } from '@/lib/rl/getMe'
 import { EmptyState } from '@/components/rl/EmptyState'
+import { PageHeader } from '@/components/rl/PageHeader'
 import { SetupRequired } from '@/components/rl/SetupRequired'
 import { LedgerClient } from './LedgerClient'
 import type { ExpenseDTO } from '@/types/rl'
@@ -42,13 +43,11 @@ export default async function LedgerPage({ params }: Props) {
   }))
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden">
-      <div className="bg-white py-[14px] border-b border-[var(--rl-border)] flex-shrink-0">
-        <h1 className="text-[18px] font-extrabold text-[var(--rl-ink)]">Ledger</h1>
-        <p className="text-[11px] text-[var(--rl-ink-muted)] mt-[2px]">
-          {group.name} · {expenses.length} transactions
-        </p>
-      </div>
+    <div className="rl-page flex-1 overflow-hidden">
+      <PageHeader
+        title="Activity"
+        subtitle={`${group.name} · ${expenses.length} transactions`}
+      />
 
       {expenses.length === 0 ? (
         <EmptyState
@@ -58,7 +57,9 @@ export default async function LedgerPage({ params }: Props) {
           ctaHref={`/groups/${groupId}/add`}
         />
       ) : (
-        <LedgerClient expenses={serialized} myId={me.id} />
+        <section className="rl-section flex-1 overflow-hidden">
+          <LedgerClient expenses={serialized} myId={me.id} />
+        </section>
       )}
     </div>
   )

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { TransactionCard } from '@/components/rl/TransactionCard'
 import { BottomSheet } from '@/components/rl/BottomSheet'
-import { TransactionDetail } from '@/components/rl/TransactionDetail'
+import { TransactionDetail, EXPENSE_DETAIL_TITLE_ID } from '@/components/rl/TransactionDetail'
 import type { ExpenseDTO } from '@/types/rl'
 
 interface Props {
@@ -16,12 +16,19 @@ export function DashboardClient({ expenses, myId }: Props) {
 
   return (
     <>
-      <div className="flex flex-col gap-2">
+      <ul className="rl-list" aria-label="Recent expenses">
         {expenses.map((e) => (
-          <TransactionCard key={e.id} expense={e} myId={myId} onClick={() => setSelected(e)} />
+          <li key={e.id}>
+            <TransactionCard expense={e} myId={myId} onClick={() => setSelected(e)} />
+          </li>
         ))}
-      </div>
-      <BottomSheet open={!!selected} onClose={() => setSelected(null)}>
+      </ul>
+      <BottomSheet
+        open={!!selected}
+        onClose={() => setSelected(null)}
+        titleId={EXPENSE_DETAIL_TITLE_ID}
+        closeLabel={selected ? `Close details for ${selected.title}` : 'Close details'}
+      >
         {selected && <TransactionDetail expense={selected} myId={myId} />}
       </BottomSheet>
     </>

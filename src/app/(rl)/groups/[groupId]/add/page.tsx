@@ -24,7 +24,7 @@ export default async function AddExpensePage({ params }: Props) {
   }))
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden">
+    <div className="rl-page flex-1 overflow-hidden">
       <AddExpenseForm roommates={dtos} myId={me.id} groupId={groupId} />
     </div>
   )

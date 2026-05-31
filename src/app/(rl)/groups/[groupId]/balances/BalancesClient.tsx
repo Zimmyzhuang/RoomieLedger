@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { formatCurrency } from '@/lib/rl/formatCurrency'
+import { LiveRegion } from '@/components/rl/LiveRegion'
 import type { BalanceDTO } from '@/types/rl'
 
 interface Props {
@@ -13,98 +14,153 @@ interface Props {
 export function BalancesClient({ balances: initial, myId, groupId }: Props) {
   const [balances, setBalances] = useState(initial)
   const [, startTransition] = useTransition()
+  const [statusMessage, setStatusMessage] = useState('')
+  const [pendingId, setPendingId] = useState<string | null>(null)
 
   const totalOwing = balances.filter((b) => b.netCents < 0).reduce((s, b) => s + Math.abs(b.netCents), 0)
-  const totalOwed  = balances.filter((b) => b.netCents > 0).reduce((s, b) => s + b.netCents, 0)
+  const totalOwed = balances.filter((b) => b.netCents > 0).reduce((s, b) => s + b.netCents, 0)
 
   async function handleSettle(b: BalanceDTO) {
     if (b.netCents === 0) return
 
-    const body = b.netCents > 0
-      ? { payerId: b.roommateId, receiverId: myId, amount: b.netCents }
-      : { payerId: myId, receiverId: b.roommateId, amount: Math.abs(b.netCents) }
+    setPendingId(b.roommateId)
+    setStatusMessage(`Marking balance with ${b.name} as settled…`)
 
-    await fetch('/api/rl/settlements', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...body, groupId }),
-    })
+    const body =
+      b.netCents > 0
+        ? { payerId: b.roommateId, receiverId: myId, amount: b.netCents }
+        : { payerId: myId, receiverId: b.roommateId, amount: Math.abs(b.netCents) }
 
-    startTransition(() => {
-      setBalances((prev) =>
-        prev.map((item) =>
-          item.roommateId === b.roommateId ? { ...item, netCents: 0 } : item,
-        ),
+    try {
+      const res = await fetch('/api/rl/settlements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...body, groupId }),
+      })
+
+      if (!res.ok) {
+        setStatusMessage(
+          `Could not record settlement with ${b.name}. Check your connection and try again.`,
+        )
+        setPendingId(null)
+        return
+      }
+
+      startTransition(() => {
+        setBalances((prev) =>
+          prev.map((item) =>
+            item.roommateId === b.roommateId ? { ...item, netCents: 0 } : item,
+          ),
+        )
+      })
+      setStatusMessage(`Balance with ${b.name} marked as settled.`)
+      setPendingId(null)
+    } catch {
+      setStatusMessage(
+        `Could not reach the server. Settlement with ${b.name} was not saved.`,
       )
-    })
+      setPendingId(null)
+    }
   }
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden">
-      <div className="flex gap-[10px] pt-3 pb-1 flex-shrink-0">
-        <div className="flex-1 rounded-[14px] p-3 text-center" style={{ background: 'var(--rl-red-light)' }}>
-          <p className="text-[9px] font-bold uppercase tracking-[0.4px] mb-1" style={{ color: 'var(--rl-red)' }}>You Owe</p>
-          <p className="text-[22px] font-extrabold" style={{ color: 'var(--rl-red)' }}>{formatCurrency(totalOwing)}</p>
+    <div className="flex flex-col flex-1 overflow-hidden gap-5">
+      <LiveRegion message={statusMessage} />
+
+      <div className="rl-stat-row flex-shrink-0" role="group" aria-label="Balance summary">
+        <div className="rl-card rl-stat-chip" style={{ background: 'var(--rl-negative-soft)' }}>
+          <p className="rl-overline rl-amount-negative">You owe</p>
+          <p className="rl-amount rl-amount-negative">{formatCurrency(totalOwing)}</p>
         </div>
-        <div className="flex-1 rounded-[14px] p-3 text-center" style={{ background: 'var(--rl-teal-light)' }}>
-          <p className="text-[9px] font-bold uppercase tracking-[0.4px] mb-1" style={{ color: 'var(--rl-teal)' }}>Owed to You</p>
-          <p className="text-[22px] font-extrabold" style={{ color: 'var(--rl-teal)' }}>{formatCurrency(totalOwed)}</p>
+        <div className="rl-card rl-stat-chip" style={{ background: 'var(--rl-accent-soft)' }}>
+          <p className="rl-overline" style={{ color: 'var(--rl-accent-hover)' }}>
+            Owed to you
+          </p>
+          <p className="rl-amount" style={{ color: 'var(--rl-accent-hover)' }}>
+            {formatCurrency(totalOwed)}
+          </p>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto py-2 flex flex-col gap-2">
+      <ul className="flex-1 overflow-y-auto rl-list pb-2" aria-label="Balances by roommate">
         {balances.map((b) => {
-          const isOwed    = b.netCents > 0
-          const isOwing   = b.netCents < 0
+          const isOwed = b.netCents > 0
+          const isOwing = b.netCents < 0
           const isSettled = b.netCents === 0
+          const isPending = pendingId === b.roommateId
 
-          const amountColor = isOwed ? 'var(--rl-green)' : isOwing ? 'var(--rl-red)' : 'var(--rl-ink-muted)'
-          const dirLabel    = isOwed ? 'Owes you' : isOwing ? 'You owe' : 'Settled'
-          const dirColor    = isOwed ? 'var(--rl-green)' : isOwing ? 'var(--rl-red)' : 'var(--rl-ink-muted)'
+          const amountClass = isOwed ? 'rl-amount-positive' : isOwing ? 'rl-amount-negative' : 'rl-amount-muted'
+          const dirLabel = isOwed ? 'Owes you' : isOwing ? 'You owe' : 'Settled'
+          const dirClass = isOwed ? 'rl-amount-positive' : isOwing ? 'rl-amount-negative' : 'rl-amount-muted'
 
-          const barWidth = isSettled ? 0 : Math.min(100, Math.round((Math.abs(b.netCents) / Math.max(totalOwed, totalOwing, 1)) * 100))
-          const barColor = isOwed ? 'var(--rl-green)' : 'var(--rl-red)'
+          const barWidth = isSettled
+            ? 0
+            : Math.min(100, Math.round((Math.abs(b.netCents) / Math.max(totalOwed, totalOwing, 1)) * 100))
+          const barColor = isOwed ? 'var(--rl-positive)' : 'var(--rl-negative)'
 
-          const btnStyle = isOwed
-            ? { color: 'var(--rl-teal)', borderColor: 'var(--rl-teal-border)', background: 'var(--rl-teal-light)' }
+          const settleLabel = isSettled
+            ? `Balance with ${b.name} is settled`
             : isOwing
-            ? { color: 'var(--rl-red)', borderColor: 'var(--rl-red-border)', background: 'var(--rl-red-light)' }
-            : { color: 'var(--rl-ink-muted)', borderColor: 'var(--rl-border)', background: '#f8fafc' }
+              ? `Mark ${formatCurrency(Math.abs(b.netCents))} owed to ${b.name} as settled`
+              : `Mark ${formatCurrency(b.netCents)} owed by ${b.name} as settled`
 
           return (
-            <div key={b.roommateId} className="bg-white rounded-[16px] p-[12px_14px]" style={{ boxShadow: 'var(--rl-shadow-card)' }}>
-              <div className="flex items-center gap-[10px] mb-[9px]">
-                <div
-                  className="w-[38px] h-[38px] rounded-full flex items-center justify-center text-[15px] font-extrabold text-white flex-shrink-0"
-                  style={{ background: b.color }}
-                >
+            <li key={b.roommateId} className="rl-card" style={{ padding: 'var(--rl-space-5)' }}>
+              <div
+                className="rl-list-row"
+                style={{ padding: 0, minHeight: 'auto', marginBottom: 'var(--rl-space-4)' }}
+              >
+                <div className="rl-avatar rl-avatar-sm" aria-hidden="true" style={{ background: b.color }}>
                   {b.name[0]}
                 </div>
-                <div className="flex-1">
-                  <p className="text-[14px] font-bold text-[var(--rl-ink)]">{b.name}</p>
-                  <p className="text-[10px] font-semibold mt-[1px]" style={{ color: dirColor }}>{dirLabel}</p>
+                <div className="rl-text-stack">
+                  <p className="rl-body font-semibold">{b.name}</p>
+                  <p className={`rl-caption font-medium ${dirClass}`}>{dirLabel}</p>
                 </div>
-                <p className="text-[18px] font-extrabold" style={{ color: amountColor }}>
-                  {isSettled ? '$0.00' : formatCurrency(Math.abs(b.netCents))}
-                </p>
+                <div className="rl-amount-col">
+                  <p className={`rl-amount ${amountClass}`}>
+                    <span className="rl-sr-only">{dirLabel}: </span>
+                    {isSettled ? '$0.00' : formatCurrency(Math.abs(b.netCents))}
+                  </p>
+                </div>
               </div>
 
-              <div className="h-[5px] bg-[#f1f5f9] rounded-full overflow-hidden mb-[10px]">
-                <div className="h-full rounded-full transition-all duration-500" style={{ width: `${barWidth}%`, background: isSettled ? '#e2e8f0' : barColor }} />
+              <div
+                className="rounded-full overflow-hidden"
+                style={{ height: 4, background: 'var(--rl-bg)', marginBottom: 'var(--rl-space-4)' }}
+                role="presentation"
+                aria-hidden="true"
+              >
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${barWidth}%`,
+                    background: isSettled ? 'var(--rl-border-strong)' : barColor,
+                  }}
+                />
               </div>
 
               <button
+                type="button"
                 onClick={() => handleSettle(b)}
-                disabled={isSettled}
-                className="w-full rounded-[10px] py-2 text-[11px] font-bold border-[1.5px] disabled:opacity-50"
-                style={btnStyle}
+                disabled={isSettled || isPending}
+                className="rl-btn rl-btn-secondary w-full disabled:opacity-50"
+                aria-busy={isPending}
+                aria-label={settleLabel}
+                style={
+                  isOwed
+                    ? { color: 'var(--rl-accent-hover)', background: 'var(--rl-accent-soft)' }
+                    : isOwing
+                      ? { color: 'var(--rl-negative)', background: 'var(--rl-negative-soft)' }
+                      : undefined
+                }
               >
-                {isSettled ? '✓ Settled' : 'Mark as Settled'}
+                {isPending ? 'Saving…' : isSettled ? 'Settled' : 'Mark as settled'}
               </button>
-            </div>
+            </li>
           )
         })}
-      </div>
+      </ul>
     </div>
   )
 }

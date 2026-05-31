@@ -2,6 +2,7 @@ import { prisma } from '@/lib/rl/db'
 import { getMe } from '@/lib/rl/getMe'
 import { calculateBalances } from '@/lib/rl/balances'
 import { EmptyState } from '@/components/rl/EmptyState'
+import { PageHeader } from '@/components/rl/PageHeader'
 import { SetupRequired } from '@/components/rl/SetupRequired'
 import { BalancesClient } from './BalancesClient'
 import type { BalanceDTO } from '@/types/rl'
@@ -57,13 +58,11 @@ export default async function BalancesPage({ params }: Props) {
   })
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden">
-      <div className="bg-white py-[14px] border-b border-[var(--rl-border)] flex-shrink-0">
-        <h1 className="text-[18px] font-extrabold text-[var(--rl-ink)]">Balances</h1>
-        <p className="text-[11px] text-[var(--rl-ink-muted)] mt-[2px]">
-          {group.name} · {others.length} roommates · {balances.filter((b) => b.netCents !== 0).length} unsettled
-        </p>
-      </div>
+    <div className="rl-page flex-1 overflow-hidden">
+      <PageHeader
+        title="Balances"
+        subtitle={`${group.name} · ${others.length} roommates · ${balances.filter((b) => b.netCents !== 0).length} unsettled`}
+      />
 
       {allExpenses.length === 0 ? (
         <EmptyState

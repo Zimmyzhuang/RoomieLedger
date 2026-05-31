@@ -1,13 +1,12 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { CategoryIcon } from '@/components/rl/CategoryIcon'
+import { TransactionCard } from '@/components/rl/TransactionCard'
 import { BottomSheet } from '@/components/rl/BottomSheet'
-import { TransactionDetail } from '@/components/rl/TransactionDetail'
-import { formatCurrency } from '@/lib/rl/formatCurrency'
-import type { ExpenseDTO, Category } from '@/types/rl'
+import { TransactionDetail, EXPENSE_DETAIL_TITLE_ID } from '@/components/rl/TransactionDetail'
+import type { ExpenseDTO } from '@/types/rl'
 
-const CATEGORIES = ['all', 'groceries', 'utilities', 'food', 'rent', 'internet']
+const CATEGORIES = ['all', 'groceries', 'utilities', 'food', 'rent', 'internet'] as const
 
 interface Props {
   expenses: ExpenseDTO[]
@@ -38,97 +37,97 @@ export function LedgerClient({ expenses, myId }: Props) {
   }, [filtered])
 
   return (
-    <>
-      {/* Search */}
-      <div className="mt-[10px] bg-white rounded-[12px] px-[13px] py-[9px] flex items-center gap-2 flex-shrink-0" style={{ boxShadow: 'var(--rl-shadow-card)' }}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width={15} height={15} className="flex-shrink-0">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    <div className="flex flex-col flex-1 overflow-hidden gap-4">
+      <label className="rl-search flex-shrink-0" htmlFor="ledger-search">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="var(--rl-ink-muted)"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          width={18}
+          height={18}
+          className="flex-shrink-0"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
+        <span className="rl-sr-only">Search expenses</span>
         <input
-          type="text"
-          placeholder="Search expenses..."
+          id="ledger-search"
+          type="search"
+          placeholder="Search by title…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 text-[12px] text-[var(--rl-ink)] bg-transparent outline-none placeholder:text-[var(--rl-ink-muted)]"
+          className="rl-input"
+          autoComplete="off"
         />
-      </div>
+      </label>
 
-      {/* Category filter */}
-      <div className="flex gap-[6px] py-2 overflow-x-auto flex-shrink-0 no-scrollbar">
+      <div
+        className="rl-chip-scroll no-scrollbar flex-shrink-0"
+        role="group"
+        aria-label="Filter by category"
+      >
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
+            type="button"
             onClick={() => setCategory(cat)}
-            className="px-3 py-[5px] rounded-[20px] text-[10px] font-bold whitespace-nowrap capitalize"
-            style={
-              cat === category
-                ? { background: 'var(--rl-teal)', color: '#fff' }
-                : { background: '#f1f5f9', color: '#64748b' }
-            }
+            className={`rl-pill capitalize flex-shrink-0 ${cat === category ? 'rl-pill-active' : ''}`}
+            aria-pressed={cat === category}
           >
             {cat}
           </button>
         ))}
       </div>
 
-      {/* List */}
-      <div className="flex-1 overflow-y-auto pb-2">
+      <div className="flex-1 overflow-y-auto pb-2" aria-live="polite" aria-relevant="additions">
         {grouped.size === 0 && (
-          <div className="flex flex-col items-center gap-2 pt-16 text-center px-6">
-            <p className="text-[14px] font-bold text-[var(--rl-ink)]">No results</p>
-            <p className="text-[12px] text-[var(--rl-ink-muted)]">Try a different search or category.</p>
+          <div className="flex flex-col items-center gap-2 pt-16 text-center px-6" role="status">
+            <p className="rl-h2">No results</p>
+            <p className="rl-caption">
+              Try a different search term or choose another category filter.
+            </p>
           </div>
         )}
         {Array.from(grouped.entries()).map(([label, group]) => (
-          <div key={label}>
-            <p className="text-[10px] font-bold text-[var(--rl-ink-muted)] uppercase tracking-[0.5px] pt-[6px] pb-[3px]">
+          <section key={label} className="mb-5" aria-labelledby={`ledger-${label.replace(/\s/g, '-')}`}>
+            <h2 id={`ledger-${label.replace(/\s/g, '-')}`} className="rl-overline mb-3">
               {label}
-            </p>
-            <div className="flex flex-col gap-[6px]">
-              {group.map((e) => {
-                const myShare = e.participants.find((p) => p.roommateId === myId)?.shareAmount ?? 0
-                const iPaid = e.paidById === myId
-                const amount = iPaid ? myShare * (e.participants.length - 1) : myShare
-                return (
-                  <button
-                    key={e.id}
+            </h2>
+            <ul className="rl-list">
+              {group.map((e) => (
+                <li key={e.id}>
+                  <TransactionCard
+                    expense={e}
+                    myId={myId}
                     onClick={() => setSelected(e)}
-                    className="bg-white rounded-[14px] p-[10px_12px] flex items-center gap-[10px] w-full text-left"
-                    style={{ boxShadow: 'var(--rl-shadow-card)' }}
-                  >
-                    <CategoryIcon category={e.category as Category} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-bold text-[var(--rl-ink)] truncate">{e.title}</p>
-                      <p className="text-[10px] text-[var(--rl-ink-muted)] mt-[1px]">
-                        {e.paidByName} paid · {e.participants.length} people
-                      </p>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-[13px] font-extrabold" style={{ color: iPaid ? 'var(--rl-green)' : 'var(--rl-red)' }}>
-                        {iPaid ? '+' : '-'}{formatCurrency(amount)}
-                      </p>
-                      <p className="text-[10px] text-[var(--rl-ink-muted)]">
-                        {iPaid ? 'you get back' : 'your share'}
-                      </p>
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+                  />
+                </li>
+              ))}
+            </ul>
+          </section>
         ))}
       </div>
 
-      <BottomSheet open={!!selected} onClose={() => setSelected(null)}>
+      <BottomSheet
+        open={!!selected}
+        onClose={() => setSelected(null)}
+        titleId={EXPENSE_DETAIL_TITLE_ID}
+        closeLabel={selected ? `Close details for ${selected.title}` : 'Close details'}
+      >
         {selected && <TransactionDetail expense={selected} myId={myId} />}
       </BottomSheet>
-    </>
+    </div>
   )
 }
 
 function dateLabel(date: Date): string {
   const now = new Date()
-  const diff = Math.round((now.setHours(0,0,0,0) - date.setHours(0,0,0,0)) / 86400000)
+  const diff = Math.round((now.setHours(0, 0, 0, 0) - date.setHours(0, 0, 0, 0)) / 86400000)
   if (diff === 0) return 'Today'
   if (diff === 1) return 'Yesterday'
   return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })

@@ -1,8 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CategoryIcon } from '@/components/rl/CategoryIcon'
+import { FormField, fieldInputProps } from '@/components/rl/FormField'
+import { LiveRegion } from '@/components/rl/LiveRegion'
+import { PageHeader } from '@/components/rl/PageHeader'
 import type { RoommateDTO, Category, CreateExpenseBody } from '@/types/rl'
 
 const CATEGORIES: Category[] = ['groceries', 'utilities', 'food', 'rent', 'internet', 'other']
@@ -13,15 +16,28 @@ interface Props {
   groupId: string
 }
 
+type FieldErrors = {
+  form?: string
+  title?: string
+  amount?: string
+  split?: string
+}
+
 export function AddExpenseForm({ roommates, myId, groupId }: Props) {
   const router = useRouter()
+  const formId = useId()
+  const amountId = `${formId}-amount`
+  const titleId = `${formId}-title`
+  const paidById = `${formId}-paid-by`
+
   const [title, setTitle] = useState('')
   const [amountStr, setAmountStr] = useState('')
   const [category, setCategory] = useState<Category>('groceries')
-  const [paidById, setPaidById] = useState(myId)
+  const [paidBy, setPaidBy] = useState(myId)
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set(roommates.map((r) => r.id)))
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState<FieldErrors>({})
+  const [statusMessage, setStatusMessage] = useState('')
 
   const amountCents = Math.round(parseFloat(amountStr || '0') * 100)
   const participantCount = checkedIds.size
@@ -30,168 +46,262 @@ export function AddExpenseForm({ roommates, myId, groupId }: Props) {
   function toggleRoommate(id: string) {
     setCheckedIds((prev) => {
       const next = new Set(prev)
-      if (next.has(id)) { next.delete(id) } else { next.add(id) }
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
       return next
     })
+    setErrors((e) => ({ ...e, split: undefined }))
   }
 
-  async function handleSubmit() {
-    if (!title.trim()) { setError('Please enter a title.'); return }
-    if (amountCents <= 0) { setError('Please enter an amount.'); return }
-    if (checkedIds.size === 0) { setError('Select at least one person to split with.'); return }
+  function validate(): FieldErrors {
+    const next: FieldErrors = {}
+    if (!title.trim()) {
+      next.title = 'Enter a short title so everyone recognizes this expense (for example, "Groceries").'
+    }
+    if (!amountStr.trim() || amountCents <= 0) {
+      next.amount = 'Enter an amount greater than zero, using dollars and cents (for example, 42.50).'
+    }
+    if (checkedIds.size === 0) {
+      next.split = 'Select at least one roommate to include in the split.'
+    }
+    return next
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const fieldErrors = validate()
+    if (Object.keys(fieldErrors).length > 0) {
+      setErrors(fieldErrors)
+      setStatusMessage('Please fix the highlighted fields before saving.')
+      return
+    }
 
     setSubmitting(true)
-    setError('')
+    setErrors({})
+    setStatusMessage('Saving expense…')
 
     const body: CreateExpenseBody = {
       groupId,
       title: title.trim(),
       amountCents,
       category,
-      paidById,
+      paidById: paidBy,
       participantIds: Array.from(checkedIds),
     }
 
-    const res = await fetch('/api/rl/expenses', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
+    try {
+      const res = await fetch('/api/rl/expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
 
-    if (!res.ok) {
-      setError('Failed to add expense. Please try again.')
+      if (!res.ok) {
+        setErrors({
+          form: 'We could not save this expense. Check your connection and try again.',
+        })
+        setStatusMessage('')
+        setSubmitting(false)
+        return
+      }
+
+      setStatusMessage('Expense added successfully.')
+      router.push(`/?g=${groupId}`)
+      router.refresh()
+    } catch {
+      setErrors({
+        form: 'We could not reach the server. Check your connection and try again.',
+      })
+      setStatusMessage('')
       setSubmitting(false)
-      return
     }
-
-    router.push(`/groups/${groupId}/home`)
-    router.refresh()
   }
 
   return (
-    <div className="flex-1 overflow-y-auto py-3 flex flex-col gap-2">
-      <div className="bg-white rounded-[18px] p-4 text-center" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}>
-        <p className="text-[10px] font-bold text-[var(--rl-ink-muted)] uppercase tracking-[0.4px] mb-[5px]">How much?</p>
-        <div className="flex items-center justify-center gap-[2px]">
-          <span className="text-[28px] font-extrabold text-[var(--rl-teal)]">$</span>
+    <form className="rl-page flex-1 overflow-y-auto" onSubmit={handleSubmit} noValidate>
+      <PageHeader
+        titleId="add-expense-title"
+        title="Add expense"
+        subtitle="Split fairly with your group"
+      />
+
+      <LiveRegion message={statusMessage} politeness="assertive" />
+
+      {errors.form ? (
+        <p className="rl-field-error" role="alert">
+          {errors.form}
+        </p>
+      ) : null}
+
+      <FormField
+        id={amountId}
+        label="Amount"
+        hint="Enter the total in US dollars."
+        error={errors.amount}
+        required
+      >
+        <div className="rl-amount-entry">
+          <span className="rl-amount-entry-symbol" aria-hidden="true">
+            $
+          </span>
           <input
             type="number"
             inputMode="decimal"
+            step="0.01"
+            min="0.01"
             placeholder="0.00"
             value={amountStr}
-            onChange={(e) => setAmountStr(e.target.value)}
-            className="text-[36px] font-extrabold text-[var(--rl-teal)] bg-transparent outline-none w-[160px] text-center tracking-tight"
+            onChange={(e) => {
+              setAmountStr(e.target.value)
+              setErrors((err) => ({ ...err, amount: undefined }))
+            }}
+            className="rl-input rl-amount-entry-input"
+            {...fieldInputProps(amountId, { hint: 'Enter the total in US dollars.', error: errors.amount, required: true })}
           />
         </div>
-      </div>
+      </FormField>
 
-      <div className="bg-white rounded-[14px] px-[13px] py-[10px]" style={{ boxShadow: 'var(--rl-shadow-card)' }}>
-        <p className="text-[9px] font-bold text-[var(--rl-ink-muted)] uppercase tracking-[0.5px] mb-1">Title</p>
+      <FormField
+        id={titleId}
+        label="Title"
+        hint="A short name everyone will recognize."
+        error={errors.title}
+        required
+      >
         <input
           type="text"
           placeholder="e.g. Trader Joe's run"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full text-[13px] font-semibold text-[var(--rl-ink)] bg-transparent outline-none placeholder:text-[var(--rl-ink-muted)]"
+          onChange={(e) => {
+            setTitle(e.target.value)
+            setErrors((err) => ({ ...err, title: undefined }))
+          }}
+          className="rl-input"
+          {...fieldInputProps(titleId, {
+            hint: 'A short name everyone will recognize.',
+            error: errors.title,
+            required: true,
+          })}
         />
-      </div>
+      </FormField>
 
-      <div className="bg-white rounded-[14px] px-[13px] py-[10px]" style={{ boxShadow: 'var(--rl-shadow-card)' }}>
-        <p className="text-[9px] font-bold text-[var(--rl-ink-muted)] uppercase tracking-[0.5px] mb-1">Paid By</p>
+      <FormField id={paidById} label="Paid by" required>
         <select
-          value={paidById}
-          onChange={(e) => setPaidById(e.target.value)}
-          className="w-full text-[13px] font-semibold text-[var(--rl-ink)] bg-transparent outline-none"
+          value={paidBy}
+          onChange={(e) => setPaidBy(e.target.value)}
+          className="rl-input"
+          {...fieldInputProps(paidById, { required: true })}
         >
           {roommates.map((r) => (
             <option key={r.id} value={r.id}>
-              {r.name}{r.id === myId ? ' (You)' : ''}
+              {r.name}
+              {r.id === myId ? ' (You)' : ''}
             </option>
           ))}
         </select>
-      </div>
+      </FormField>
 
-      <div className="bg-white rounded-[14px] px-[13px] py-[10px]" style={{ boxShadow: 'var(--rl-shadow-card)' }}>
-        <p className="text-[9px] font-bold text-[var(--rl-ink-muted)] uppercase tracking-[0.5px] mb-2">Category</p>
-        <div className="flex flex-wrap gap-[6px]">
+      <fieldset className="rl-field">
+        <legend className="rl-legend">Category</legend>
+        <p className="rl-field-hint">Choose the type of expense.</p>
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Expense category">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
+              type="button"
               onClick={() => setCategory(cat)}
-              className="flex items-center gap-1 px-[10px] py-[5px] rounded-[20px] text-[11px] font-semibold capitalize border-[1.5px]"
-              style={
-                cat === category
-                  ? { background: 'var(--rl-teal-light)', color: 'var(--rl-teal)', borderColor: 'var(--rl-teal-border)' }
-                  : { background: '#f1f5f9', color: '#64748b', borderColor: 'transparent' }
-              }
+              className={`rl-pill capitalize flex items-center gap-1.5 ${cat === category ? 'rl-pill-active' : ''}`}
+              aria-pressed={cat === category}
             >
-              <CategoryIcon category={cat} size={16} />
+              <CategoryIcon category={cat} compact />
               {cat}
             </button>
           ))}
         </div>
-      </div>
+      </fieldset>
 
-      <div className="bg-white rounded-[14px] px-[13px] py-[10px]" style={{ boxShadow: 'var(--rl-shadow-card)' }}>
-        <p className="text-[9px] font-bold text-[var(--rl-ink-muted)] uppercase tracking-[0.5px] mb-[2px]">Split With</p>
-        <p className="text-[10px] text-[var(--rl-teal)] font-semibold mb-2">
-          Equal · {sharePerPerson > 0 ? `$${(sharePerPerson / 100).toFixed(2)} each` : '—'}
+      <fieldset className="rl-field">
+        <legend className="rl-legend">Split with</legend>
+        <p className="rl-field-hint" id={`${formId}-split-hint`}>
+          Equal split
+          {sharePerPerson > 0
+            ? ` · ${(sharePerPerson / 100).toFixed(2)} dollars per person`
+            : ' · select roommates below'}
         </p>
-        <div className="flex flex-col gap-0">
-          {roommates.map((r) => {
-            const checked = checkedIds.has(r.id)
-            return (
-              <button
-                key={r.id}
-                onClick={() => toggleRoommate(r.id)}
-                className="flex items-center gap-2 py-[7px] border-b border-[#f8fafc] last:border-none w-full text-left"
-              >
-                <div
-                  className="w-[18px] h-[18px] rounded-[5px] flex items-center justify-center flex-shrink-0"
-                  style={
-                    checked
-                      ? { background: 'var(--rl-teal)' }
-                      : { background: '#fff', border: '2px solid #cbd5e1' }
-                  }
-                >
-                  {checked && (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" width={11} height={11}>
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                  )}
-                </div>
-                <div
-                  className="w-[26px] h-[26px] rounded-full flex items-center justify-center text-[10px] font-extrabold text-white flex-shrink-0"
-                  style={{ background: r.color }}
-                >
-                  {r.name[0]}
-                </div>
-                <span className="flex-1 text-[12px] font-semibold text-[var(--rl-ink)]">
-                  {r.name}{r.id === myId ? ' (You)' : ''}
-                </span>
-                <span className="text-[12px] font-bold" style={{ color: checked ? 'var(--rl-teal)' : '#cbd5e1' }}>
-                  {checked && sharePerPerson > 0 ? `$${(sharePerPerson / 100).toFixed(2)}` : '—'}
-                </span>
-              </button>
-            )
-          })}
+        {errors.split ? (
+          <p className="rl-field-error" role="alert" id={`${formId}-split-error`}>
+            {errors.split}
+          </p>
+        ) : null}
+        <div className="rl-field-control" style={{ padding: 0 }}>
+          <ul className="flex flex-col" aria-describedby={`${formId}-split-hint`}>
+            {roommates.map((r, i) => {
+              const checked = checkedIds.has(r.id)
+              const name = `${r.name}${r.id === myId ? ' (you)' : ''}`
+              return (
+                <li key={r.id}>
+                  <button
+                    type="button"
+                    onClick={() => toggleRoommate(r.id)}
+                    className="rl-list-row w-full text-left border-0 bg-transparent cursor-pointer"
+                    style={{
+                      boxShadow: i > 0 ? 'inset 0 1px 0 var(--rl-border)' : undefined,
+                      minHeight: 'var(--rl-touch-min)',
+                    }}
+                    aria-pressed={checked}
+                    aria-label={`${name}, ${checked ? 'included' : 'not included'} in split${
+                      checked && sharePerPerson > 0
+                        ? `, share ${(sharePerPerson / 100).toFixed(2)} dollars`
+                        : ''
+                    }`}
+                  >
+                    <span
+                      className="flex items-center justify-center flex-shrink-0"
+                      style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: 6,
+                        background: checked ? 'var(--rl-accent)' : 'var(--rl-surface)',
+                        border: checked ? 'none' : '2px solid var(--rl-border-strong)',
+                      }}
+                      aria-hidden="true"
+                    >
+                      {checked && (
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" width={12} height={12}>
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </span>
+                    <div className="rl-avatar rl-avatar-sm" aria-hidden="true" style={{ background: r.color }}>
+                      {r.name[0]}
+                    </div>
+                    <span className="rl-body font-medium flex-1">{name}</span>
+                    <span className="rl-amount" style={{ color: checked ? 'var(--rl-accent-hover)' : 'var(--rl-ink-muted)' }}>
+                      {checked && sharePerPerson > 0 ? `$${(sharePerPerson / 100).toFixed(2)}` : '—'}
+                    </span>
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
         </div>
-      </div>
-
-      {error && (
-        <p className="text-[12px] font-semibold text-[var(--rl-red)] text-center px-2">{error}</p>
-      )}
+      </fieldset>
 
       <button
-        onClick={handleSubmit}
+        type="submit"
         disabled={submitting}
-        className="w-full text-white text-[14px] font-extrabold rounded-[14px] py-[13px] disabled:opacity-60"
-        style={{ background: 'var(--rl-teal)', boxShadow: 'var(--rl-shadow-strong)' }}
+        className="rl-btn rl-btn-primary disabled:opacity-60"
+        aria-busy={submitting}
       >
-        {submitting ? 'Adding…' : 'Add Expense'}
+        {submitting ? (
+          <span className="rl-loading">
+            <span aria-hidden="true">…</span>
+            Saving expense
+          </span>
+        ) : (
+          'Add expense'
+        )}
       </button>
-
-      <div className="h-4" />
-    </div>
+    </form>
   )
 }

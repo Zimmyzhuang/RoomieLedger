@@ -2,6 +2,7 @@
 
 import { CategoryIcon } from './CategoryIcon'
 import { formatCurrency } from '@/lib/rl/formatCurrency'
+import { describeExpenseAction } from '@/lib/rl/a11y'
 import type { ExpenseDTO, Category } from '@/types/rl'
 
 interface Props {
@@ -20,27 +21,33 @@ export function TransactionCard({ expense, myId, onClick }: Props) {
 
   const date = new Date(expense.createdAt)
   const dateLabel = formatDate(date)
+  const amountWord = isPositive ? 'you receive' : 'you owe'
+  const amountText = `${isPositive ? '+' : '-'}${formatCurrency(displayAmount)}`
+  const payerText = iPaid ? 'you paid' : `${expense.paidByName} paid`
+
+  const ariaLabel = describeExpenseAction(
+    expense.title,
+    `${amountWord} ${formatCurrency(displayAmount)}`,
+    `${dateLabel}, ${expense.category}, ${payerText}. Tap for details.`,
+  )
 
   return (
-    <button
-      onClick={onClick}
-      className="w-full bg-white rounded-[14px] p-[10px_12px] flex items-center gap-[10px] text-left"
-      style={{ boxShadow: 'var(--rl-shadow-card)', minHeight: 52 }}
-    >
-      <CategoryIcon category={expense.category as Category} />
-      <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-bold text-[var(--rl-ink)] leading-[1.2] truncate">{expense.title}</p>
-        <p className="text-[10px] text-[var(--rl-ink-muted)] mt-[2px]">
+    <button type="button" onClick={onClick} className="rl-tappable-row" aria-label={ariaLabel}>
+      <div className="rl-media" aria-hidden="true">
+        <CategoryIcon category={expense.category as Category} />
+      </div>
+      <div className="rl-text-stack">
+        <p className="rl-body font-semibold truncate">{expense.title}</p>
+        <p className="rl-caption">
           {dateLabel} · {expense.category}
         </p>
       </div>
-      <div className="text-right flex-shrink-0">
-        <p className="text-[14px] font-extrabold leading-[1.2]" style={{ color: isPositive ? 'var(--rl-green)' : 'var(--rl-red)' }}>
-          {isPositive ? '+' : '-'}{formatCurrency(displayAmount)}
+      <div className="rl-amount-col">
+        <p className={`rl-amount ${isPositive ? 'rl-amount-positive' : 'rl-amount-negative'}`}>
+          <span className="rl-sr-only">{amountWord} </span>
+          {amountText}
         </p>
-        <p className="text-[10px] text-[var(--rl-ink-muted)] mt-[2px]">
-          {iPaid ? 'you paid' : `${expense.paidByName} paid`}
-        </p>
+        <p className="rl-caption">{payerText}</p>
       </div>
     </button>
   )
@@ -48,7 +55,7 @@ export function TransactionCard({ expense, myId, onClick }: Props) {
 
 function formatDate(date: Date): string {
   const now = new Date()
-  const diff = now.setHours(0,0,0,0) - date.setHours(0,0,0,0)
+  const diff = now.setHours(0, 0, 0, 0) - date.setHours(0, 0, 0, 0)
   const days = Math.round(diff / 86400000)
   if (days === 0) return 'Today'
   if (days === 1) return 'Yesterday'
