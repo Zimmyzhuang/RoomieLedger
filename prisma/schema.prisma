@@ -6,27 +6,44 @@ datasource db {
   provider = "sqlite"
 }
 
-model Roommate {
+model Group {
   id        String   @id @default(cuid())
   name      String
-  handle    String   @unique
+  emoji     String   @default("🏠")
+  createdAt DateTime @default(now())
+
+  roommates   Roommate[]
+  expenses    Expense[]
+  settlements Settlement[]
+}
+
+model Roommate {
+  id        String   @id @default(cuid())
+  groupId   String
+  name      String
+  handle    String
   color     String   @default("#64748b")
   createdAt DateTime @default(now())
 
+  group             Group                @relation(fields: [groupId], references: [id], onDelete: Cascade)
   paidExpenses      Expense[]            @relation("PaidBy")
   participations    ExpenseParticipant[]
   settlementsGiven  Settlement[]         @relation("Payer")
   settlementsRecv   Settlement[]         @relation("Receiver")
+
+  @@unique([groupId, handle])
 }
 
 model Expense {
   id           String   @id @default(cuid())
+  groupId      String
   title        String
   amount       Int      // stored as cents (e.g. $40.00 = 4000)
   category     String   @default("other")
   paidById     String
   createdAt    DateTime @default(now())
 
+  group        Group                @relation(fields: [groupId], references: [id], onDelete: Cascade)
   paidBy       Roommate             @relation("PaidBy", fields: [paidById], references: [id])
   participants ExpenseParticipant[]
 }
@@ -45,11 +62,13 @@ model ExpenseParticipant {
 
 model Settlement {
   id         String   @id @default(cuid())
+  groupId    String
   payerId    String
   receiverId String
   amount     Int      // cents
   settledAt  DateTime @default(now())
 
-  payer    Roommate @relation("Payer",    fields: [payerId],    references: [id])
+  group    Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  payer    Roommate @relation("Payer", fields: [payerId], references: [id])
   receiver Roommate @relation("Receiver", fields: [receiverId], references: [id])
 }

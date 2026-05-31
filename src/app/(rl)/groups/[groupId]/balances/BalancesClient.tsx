@@ -7,9 +7,10 @@ import type { BalanceDTO } from '@/types/rl'
 interface Props {
   balances: BalanceDTO[]
   myId: string
+  groupId: string
 }
 
-export function BalancesClient({ balances: initial, myId }: Props) {
+export function BalancesClient({ balances: initial, myId, groupId }: Props) {
   const [balances, setBalances] = useState(initial)
   const [, startTransition] = useTransition()
 
@@ -26,7 +27,7 @@ export function BalancesClient({ balances: initial, myId }: Props) {
     await fetch('/api/rl/settlements', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ ...body, groupId }),
     })
 
     startTransition(() => {
@@ -40,7 +41,7 @@ export function BalancesClient({ balances: initial, myId }: Props) {
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      <div className="flex gap-[10px] px-3 pt-3 pb-1 flex-shrink-0">
+      <div className="flex gap-[10px] pt-3 pb-1 flex-shrink-0">
         <div className="flex-1 rounded-[14px] p-3 text-center" style={{ background: 'var(--rl-red-light)' }}>
           <p className="text-[9px] font-bold uppercase tracking-[0.4px] mb-1" style={{ color: 'var(--rl-red)' }}>You Owe</p>
           <p className="text-[22px] font-extrabold" style={{ color: 'var(--rl-red)' }}>{formatCurrency(totalOwing)}</p>
@@ -51,7 +52,7 @@ export function BalancesClient({ balances: initial, myId }: Props) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-2">
+      <div className="flex-1 overflow-y-auto py-2 flex flex-col gap-2">
         {balances.map((b) => {
           const isOwed    = b.netCents > 0
           const isOwing   = b.netCents < 0

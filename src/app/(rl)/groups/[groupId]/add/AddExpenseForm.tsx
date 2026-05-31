@@ -10,9 +10,10 @@ const CATEGORIES: Category[] = ['groceries', 'utilities', 'food', 'rent', 'inter
 interface Props {
   roommates: RoommateDTO[]
   myId: string
+  groupId: string
 }
 
-export function AddExpenseForm({ roommates, myId }: Props) {
+export function AddExpenseForm({ roommates, myId, groupId }: Props) {
   const router = useRouter()
   const [title, setTitle] = useState('')
   const [amountStr, setAmountStr] = useState('')
@@ -43,6 +44,7 @@ export function AddExpenseForm({ roommates, myId }: Props) {
     setError('')
 
     const body: CreateExpenseBody = {
+      groupId,
       title: title.trim(),
       amountCents,
       category,
@@ -62,12 +64,12 @@ export function AddExpenseForm({ roommates, myId }: Props) {
       return
     }
 
-    router.push('/')
+    router.push(`/groups/${groupId}/home`)
     router.refresh()
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-2">
+    <div className="flex-1 overflow-y-auto py-3 flex flex-col gap-2">
       <div className="bg-white rounded-[18px] p-4 text-center" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}>
         <p className="text-[10px] font-bold text-[var(--rl-ink-muted)] uppercase tracking-[0.4px] mb-[5px]">How much?</p>
         <div className="flex items-center justify-center gap-[2px]">

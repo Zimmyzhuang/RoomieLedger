@@ -1,17 +1,32 @@
 import { prisma } from '@/lib/rl/db'
+import { getMe } from '@/lib/rl/getMe'
 import { calculateBalances } from '@/lib/rl/balances'
 import { formatCurrency } from '@/lib/rl/formatCurrency'
 import { CategoryIcon } from '@/components/rl/CategoryIcon'
+import { SetupRequired } from '@/components/rl/SetupRequired'
 import type { Category } from '@/types/rl'
 
-export default async function RoommatesPage() {
-  const [roommates, allExpenses, settlements] = await Promise.all([
-    prisma.roommate.findMany({ orderBy: { name: 'asc' } }),
-    prisma.expense.findMany({ include: { participants: true } }),
-    prisma.settlement.findMany(),
+interface Props {
+  params: Promise<{ groupId: string }>
+}
+
+export default async function RoommatesPage({ params }: Props) {
+  const { groupId } = await params
+
+  const [group, me, roommates, allExpenses, settlements] = await Promise.all([
+    prisma.group.findUnique({ where: { id: groupId } }),
+    getMe(groupId),
+    prisma.roommate.findMany({ where: { groupId }, orderBy: { name: 'asc' } }),
+    prisma.expense.findMany({
+      where: { groupId },
+      include: { participants: true },
+    }),
+    prisma.settlement.findMany({ where: { groupId } }),
   ])
 
-  const me = roommates[0]
+  if (!group) return null
+  if (!me) return <SetupRequired />
+
   const others = roommates.filter((r) => r.id !== me.id)
   const rawBalances = calculateBalances(me.id, allExpenses, settlements)
 
@@ -35,13 +50,13 @@ export default async function RoommatesPage() {
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       <div
-        className="flex-shrink-0 px-4 pt-[14px] pb-4"
+        className="flex-shrink-0 rl-edge-bleed pt-[14px] pb-4"
         style={{ background: 'linear-gradient(150deg, #0d9488 0%, #0f766e 100%)' }}
       >
         <div className="flex justify-between items-center mb-4">
           <div>
             <h1 className="text-[18px] font-extrabold text-white">Roommates</h1>
-            <p className="text-[11px] text-white/75">{roommates.length} people · Apt 4B</p>
+            <p className="text-[11px] text-white/75">{roommates.length} people · {group.name}</p>
           </div>
           <button className="flex items-center gap-1 text-[11px] font-bold text-white border border-white/40 bg-white/20 rounded-full px-[14px] py-[6px]">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" width={12} height={12}>
@@ -64,7 +79,7 @@ export default async function RoommatesPage() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-2">
+      <div className="flex-1 overflow-y-auto py-3 flex flex-col gap-2">
         {others.map((r) => {
           const net = rawBalances.find((b) => b.roommateId === r.id)
           const netCents = net?.netCents ?? 0

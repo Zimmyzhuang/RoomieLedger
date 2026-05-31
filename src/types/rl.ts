@@ -1,3 +1,21 @@
+export interface GroupDTO {
+  id: string
+  name: string
+  emoji: string
+  memberCount: number
+  unsettledDebtCount: number
+}
+
+export interface GroupDebtDTO {
+  fromId: string
+  fromName: string
+  fromColor: string
+  toId: string
+  toName: string
+  toColor: string
+  amountCents: number
+}
+
 export type Category =
   | 'groceries'
   | 'utilities'
@@ -43,6 +61,7 @@ export interface BalanceDTO {
 }
 
 export interface CreateExpenseBody {
+  groupId: string
   title: string
   amountCents: number
   category: Category

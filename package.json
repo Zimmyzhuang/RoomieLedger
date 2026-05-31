@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node node_modules/next/dist/bin/next dev",
+    "dev": "node node_modules/next/dist/bin/next dev -H 127.0.0.1",
     "build": "node node_modules/next/dist/bin/next build",
-    "start": "node node_modules/next/dist/bin/next start",
+    "start": "node node_modules/next/dist/bin/next start -H 127.0.0.1",
+    "postinstall": "prisma generate",
     "lint": "eslint",
-    "db:seed": "npx tsx prisma/seed.ts",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:setup": "prisma migrate deploy && npm run db:seed",
     "db:reset": "npx prisma migrate reset --force && npm run db:seed",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -38,6 +40,7 @@
     "eslint-config-next": "16.2.4",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4",
+    "tsx": "^4.22.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vitest": "^4.1.7"

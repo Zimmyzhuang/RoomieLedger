@@ -40,7 +40,7 @@ export function LedgerClient({ expenses, myId }: Props) {
   return (
     <>
       {/* Search */}
-      <div className="mx-3 mt-[10px] bg-white rounded-[12px] px-[13px] py-[9px] flex items-center gap-2 flex-shrink-0" style={{ boxShadow: 'var(--rl-shadow-card)' }}>
+      <div className="mt-[10px] bg-white rounded-[12px] px-[13px] py-[9px] flex items-center gap-2 flex-shrink-0" style={{ boxShadow: 'var(--rl-shadow-card)' }}>
         <svg viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width={15} height={15} className="flex-shrink-0">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
@@ -54,7 +54,7 @@ export function LedgerClient({ expenses, myId }: Props) {
       </div>
 
       {/* Category filter */}
-      <div className="flex gap-[6px] px-3 py-2 overflow-x-auto flex-shrink-0 no-scrollbar">
+      <div className="flex gap-[6px] py-2 overflow-x-auto flex-shrink-0 no-scrollbar">
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
@@ -81,10 +81,10 @@ export function LedgerClient({ expenses, myId }: Props) {
         )}
         {Array.from(grouped.entries()).map(([label, group]) => (
           <div key={label}>
-            <p className="text-[10px] font-bold text-[var(--rl-ink-muted)] uppercase tracking-[0.5px] px-3 pt-[6px] pb-[3px]">
+            <p className="text-[10px] font-bold text-[var(--rl-ink-muted)] uppercase tracking-[0.5px] pt-[6px] pb-[3px]">
               {label}
             </p>
-            <div className="flex flex-col gap-[6px] px-3">
+            <div className="flex flex-col gap-[6px]">
               {group.map((e) => {
                 const myShare = e.participants.find((p) => p.roommateId === myId)?.shareAmount ?? 0
                 const iPaid = e.paidById === myId

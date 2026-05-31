@@ -12,6 +12,11 @@ body {
   background: var(--rl-bg);
   color: var(--rl-ink);
   min-height: 100vh;
+  padding: var(--rl-shell-pad);
+  padding: max(var(--rl-shell-pad), env(safe-area-inset-top))
+    max(var(--rl-shell-pad), env(safe-area-inset-right))
+    max(var(--rl-shell-pad), env(safe-area-inset-bottom))
+    max(var(--rl-shell-pad), env(safe-area-inset-left));
 }
 
 /* ── RoomieLedger design tokens ── */
@@ -42,6 +47,18 @@ body {
   --rl-radius-sheet: 22px;
   --rl-shadow-card: 0 1px 6px rgba(0, 0, 0, 0.06);
   --rl-shadow-strong: 0 4px 16px rgba(13, 148, 136, 0.35);
+
+  --rl-shell-pad: 16px;
+  --rl-gutter: 20px;
+}
+
+.rl-gutter-x {
+  padding-inline: var(--rl-gutter);
+}
+
+.rl-edge-bleed {
+  margin-inline: calc(-1 * var(--rl-gutter));
+  padding-inline: var(--rl-gutter);
 }
 
 @keyframes rl-slide-up {
