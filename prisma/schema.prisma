@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Roommate {
+  id        String   @id @default(cuid())
+  name      String
+  handle    String   @unique
+  color     String   @default("#64748b")
+  createdAt DateTime @default(now())
+
+  paidExpenses      Expense[]            @relation("PaidBy")
+  participations    ExpenseParticipant[]
+  settlementsGiven  Settlement[]         @relation("Payer")
+  settlementsRecv   Settlement[]         @relation("Receiver")
+}
+
+model Expense {
+  id           String   @id @default(cuid())
+  title        String
+  amount       Int      // stored as cents (e.g. $40.00 = 4000)
+  category     String   @default("other")
+  paidById     String
+  createdAt    DateTime @default(now())
+
+  paidBy       Roommate             @relation("PaidBy", fields: [paidById], references: [id])
+  participants ExpenseParticipant[]
+}
+
+model ExpenseParticipant {
+  id          String  @id @default(cuid())
+  expenseId   String
+  roommateId  String
+  shareAmount Int     // cents
+
+  expense  Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  roommate Roommate @relation(fields: [roommateId], references: [id])
+
+  @@unique([expenseId, roommateId])
+}
+
+model Settlement {
+  id         String   @id @default(cuid())
+  payerId    String
+  receiverId String
+  amount     Int      // cents
+  settledAt  DateTime @default(now())
+
+  payer    Roommate @relation("Payer",    fields: [payerId],    references: [id])
+  receiver Roommate @relation("Receiver", fields: [receiverId], references: [id])
+}
