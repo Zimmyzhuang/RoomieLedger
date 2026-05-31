@@ -43,7 +43,7 @@ describe('calculateBalances', () => {
     expect(rubyBalance?.netCents).toBe(-3000) // I owe Ruby
   })
 
-  it('applies settlements to reduce balance', () => {
+  it('applies settlement when they owe me (payerId = them)', () => {
     const expenses = [
       {
         id: 'e1',
@@ -54,12 +54,29 @@ describe('calculateBalances', () => {
         ],
       },
     ]
-    const settlements = [
-      { payerId: RUBY, receiverId: ME, amount: 5000 },
-    ]
+    const settlements = [{ payerId: RUBY, receiverId: ME, amount: 5000 }]
     const result = calculateBalances(ME, expenses, settlements)
     const rubyBalance = result.find((b) => b.roommateId === RUBY)
-    expect(rubyBalance?.netCents).toBe(0)
+    expect(rubyBalance).toBeDefined()
+    expect(rubyBalance!.netCents).toBe(0)
+  })
+
+  it('applies settlement when I owe them (payerId = me)', () => {
+    const expenses = [
+      {
+        id: 'e1',
+        paidById: RUBY,
+        participants: [
+          { roommateId: ME, shareAmount: 3000 },
+          { roommateId: RUBY, shareAmount: 3000 },
+        ],
+      },
+    ]
+    const settlements = [{ payerId: ME, receiverId: RUBY, amount: 3000 }]
+    const result = calculateBalances(ME, expenses, settlements)
+    const rubyBalance = result.find((b) => b.roommateId === RUBY)
+    expect(rubyBalance).toBeDefined()
+    expect(rubyBalance!.netCents).toBe(0)
   })
 
   it('handles multiple people correctly', () => {
@@ -75,7 +92,11 @@ describe('calculateBalances', () => {
       },
     ]
     const result = calculateBalances(ME, expenses, [])
-    expect(result.find((b) => b.roommateId === RUBY)?.netCents).toBe(4000)
-    expect(result.find((b) => b.roommateId === JAKE)?.netCents).toBe(4000)
+    const rubyBalance = result.find((b) => b.roommateId === RUBY)
+    const jakeBalance = result.find((b) => b.roommateId === JAKE)
+    expect(rubyBalance).toBeDefined()
+    expect(jakeBalance).toBeDefined()
+    expect(rubyBalance!.netCents).toBe(4000)
+    expect(jakeBalance!.netCents).toBe(4000)
   })
 })
