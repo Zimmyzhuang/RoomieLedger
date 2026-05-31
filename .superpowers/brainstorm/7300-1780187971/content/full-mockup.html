@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RoomieLedger Mockup</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f0f4f8;
+    padding: 32px 24px;
+    color: #1a1a2e;
+  }
+
+  h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: #64748b;
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .screens {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 28px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .phone {
+    background: #fff;
+    border-radius: 32px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+    overflow: hidden;
+    border: 6px solid #1a1a2e;
+    position: relative;
+  }
+
+  .phone-notch {
+    background: #1a1a2e;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .phone-notch-pill {
+    background: #2d2d2d;
+    width: 60px;
+    height: 10px;
+    border-radius: 10px;
+  }
+
+  .screen {
+    background: #f8fafc;
+    min-height: 580px;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .screen-label {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 14px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* Shared components */
+  .status-bar {
+    background: #fff;
+    padding: 8px 16px 4px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    color: #1a1a2e;
+  }
+
+  .nav-bar {
+    background: #fff;
+    border-top: 1px solid #f1f5f9;
+    padding: 8px 0 12px;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+
+  .nav-item.active { color: #0d9488; }
+
+  .nav-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .nav-item.active .nav-icon {
+    background: #f0fdfa;
+  }
+
+  /* Dashboard */
+  .dash-header {
+    background: linear-gradient(160deg, #0d9488 0%, #0f766e 100%);
+    padding: 16px 16px 32px;
+  }
+
+  .dash-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .dash-greeting { color: rgba(255,255,255,0.85); font-size: 12px; }
+  .dash-name { color: #fff; font-size: 16px; font-weight: 700; }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .balance-label { color: rgba(255,255,255,0.7); font-size: 11px; margin-bottom: 2px; }
+  .balance-amount { color: #fff; font-size: 32px; font-weight: 700; letter-spacing: -1px; }
+  .balance-sub { color: rgba(255,255,255,0.8); font-size: 11px; margin-top: 2px; }
+
+  .dash-body { padding: 0 14px; margin-top: -18px; }
+
+  .stat-chips {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .chip {
+    flex: 1;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+
+  .chip-label { font-size: 10px; color: #94a3b8; margin-bottom: 2px; }
+  .chip-value { font-size: 14px; font-weight: 700; }
+  .chip-value.red { color: #ef4444; }
+  .chip-value.green { color: #10b981; }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+    margin-top: 12px;
+  }
+
+  .quick-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .qa-btn {
+    flex: 1;
+    background: #0d9488;
+    color: #fff;
+    border-radius: 10px;
+    padding: 10px 6px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .qa-btn.outline {
+    background: #fff;
+    color: #0d9488;
+    border: 1.5px solid #0d9488;
+  }
+
+  .txn-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .txn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: #f0fdfa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .txn-name { font-size: 12px; font-weight: 600; color: #1a1a2e; }
+  .txn-meta { font-size: 10px; color: #94a3b8; }
+  .txn-amount { margin-left: auto; font-size: 13px; font-weight: 700; }
+  .txn-amount.green { color: #10b981; }
+  .txn-amount.red { color: #ef4444; }
+  .txn-amount.muted { color: #94a3b8; }
+
+  /* Add Expense */
+  .form-header {
+    background: #fff;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .back-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .form-title { font-size: 15px; font-weight: 700; }
+
+  .form-body { padding: 14px; background: #f8fafc; }
+
+  .amount-display {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    margin-bottom: 14px;
+  }
+
+  .amount-hint { font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
+  .amount-value { font-size: 36px; font-weight: 700; color: #0d9488; letter-spacing: -1px; }
+  .amount-cursor { animation: blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+  .field {
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+
+  .field-label { font-size: 10px; color: #94a3b8; font-weight: 600; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .field-value { font-size: 13px; color: #1a1a2e; font-weight: 500; }
+  .field-value.placeholder { color: #cbd5e1; }
+
+  .category-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .cat-chip {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .cat-chip.selected {
+    background: #f0fdfa;
+    color: #0d9488;
+    border: 1px solid #99f6e4;
+  }
+
+  .split-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid #f8fafc;
+  }
+
+  .split-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .split-name { font-size: 12px; font-weight: 500; flex: 1; }
+  .split-share { font-size: 12px; color: #64748b; }
+
+  .checkbox {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid #0d9488;
+    background: #0d9488;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 9px;
+  }
+
+  .checkbox.unchecked {
+    background: #fff;
+    border-color: #cbd5e1;
+  }
+
+  .submit-btn {
+    background: #0d9488;
+    color: #fff;
+    border-radius: 14px;
+    padding: 13px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 14px;
+    box-shadow: 0 4px 14px rgba(13,148,136,0.35);
+  }
+
+  /* Balances */
+  .balances-header {
+    background: #fff;
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .balances-summary {
+    display: flex;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .summary-card {
+    flex: 1;
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .summary-card.owe { background: #fef2f2; }
+  .summary-card.owed { background: #f0fdfa; }
+
+  .summary-card .label { font-size: 10px; font-weight: 600; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .summary-card.owe .label { color: #ef4444; }
+  .summary-card.owed .label { color: #0d9488; }
+  .summary-card .amount { font-size: 20px; font-weight: 700; }
+  .summary-card.owe .amount { color: #ef4444; }
+  .summary-card.owed .amount { color: #0d9488; }
+
+  .balance-item {
+    background: #fff;
+    margin: 0 14px 8px;
+    border-radius: 14px;
+    padding: 12px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  }
+
+  .bi-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .bi-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bi-name { font-size: 13px; font-weight: 600; }
+  .bi-dir { font-size: 11px; color: #94a3b8; }
+  .bi-amount { margin-left: auto; font-size: 16px; font-weight: 700; }
+  .bi-amount.green { color: #10b981; }
+  .bi-amount.red { color: #ef4444; }
+
+  .bi-bar { height: 4px; background: #f1f5f9; border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+  .bi-fill { height: 100%; border-radius: 4px; }
+
+  .settle-btn {
+    background: #f0fdfa;
+    color: #0d9488;
+    border-radius: 8px;
+    padding: 6px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid #99f6e4;
+  }
+
+  /* Ledger */
+  .search-bar {
+    margin: 12px 14px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    font-size: 12px;
+    color: #cbd5e1;
+  }
+
+  .filter-row {
+    display: flex;
+    gap: 6px;
+    padding: 0 14px 10px;
+    overflow-x: auto;
+  }
+
+  .filter-chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #64748b;
+    white-space: nowrap;
+  }
+
+  .filter-chip.active {
+    background: #0d9488;
+    color: #fff;
+  }
+
+  .ledger-group-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 14px 4px;
+  }
+
+  .ledger-row {
+    background: #fff;
+    margin: 0 14px 6px;
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+
+  .ledger-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .ledger-name { font-size: 13px; font-weight: 600; }
+  .ledger-meta { font-size: 10px; color: #94a3b8; }
+  .ledger-right { margin-left: auto; text-align: right; }
+  .ledger-amount { font-size: 13px; font-weight: 700; }
+  .ledger-split { font-size: 10px; color: #94a3b8; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .badge.settled { background: #f0fdf4; color: #16a34a; }
+  .badge.pending { background: #fffbeb; color: #d97706; }
+</style>
+</head>
+<body>
+
+<h1>RoomieLedger — Full Mockup</h1>
+<p class="subtitle">Style B · Teal accent · All four screens</p>
+
+<div class="screens">
+
+  <!-- DASHBOARD -->
+  <div>
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+      <div class="screen">
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+
+        <div class="dash-header">
+          <div class="dash-top">
+            <div>
+              <div class="dash-greeting">Good morning 👋</div>
+              <div class="dash-name">Timothy</div>
+            </div>
+            <div class="avatar">T</div>
+          </div>
+          <div class="balance-label">Net balance</div>
+          <div class="balance-amount">+$104.50</div>
+          <div class="balance-sub">across 4 roommates</div>
+        </div>
+
+        <div class="dash-body">
+          <div class="stat-chips">
+            <div class="chip">
+              <div class="chip-label">You owe</div>
+              <div class="chip-value red">$38.00</div>
+            </div>
+            <div class="chip">
+              <div class="chip-label">Owed to you</div>
+              <div class="chip-value green">$142.50</div>
+            </div>
+            <div class="chip">
+              <div class="chip-label">Unsettled</div>
+              <div class="chip-value" style="color:#f59e0b;">3</div>
+            </div>
+          </div>
+
+          <div class="quick-actions">
+            <div class="qa-btn">+ Add Expense</div>
+            <div class="qa-btn outline">View Balances</div>
+            <div class="qa-btn outline">Ledger</div>
+          </div>
+
+          <div class="section-title">Recent Activity</div>
+
+          <div class="txn-row">
+            <div class="txn-icon">🛒</div>
+            <div>
+              <div class="txn-name">Trader Joe's</div>
+              <div class="txn-meta">Ruby paid · Today</div>
+            </div>
+            <div class="txn-amount red">-$15.25</div>
+          </div>
+          <div class="txn-row">
+            <div class="txn-icon">⚡</div>
+            <div>
+              <div class="txn-name">Electric Bill</div>
+              <div class="txn-meta">You paid · Yesterday</div>
+            </div>
+            <div class="txn-amount green">+$56.00</div>
+          </div>
+          <div class="txn-row">
+            <div class="txn-icon">🍕</div>
+            <div>
+              <div class="txn-name">Domino's Pizza</div>
+              <div class="txn-meta">Jake paid · May 28</div>
+            </div>
+            <div class="txn-amount red">-$9.50</div>
+          </div>
+          <div class="txn-row" style="border:none;">
+            <div class="txn-icon">🌐</div>
+            <div>
+              <div class="txn-name">Internet</div>
+              <div class="txn-meta">You paid · May 27</div>
+            </div>
+            <div class="txn-amount green">+$30.00</div>
+          </div>
+        </div>
+
+        <div class="nav-bar">
+          <div class="nav-item active"><div class="nav-icon">🏠</div>Home</div>
+          <div class="nav-item"><div class="nav-icon">⚖️</div>Balances</div>
+          <div class="nav-item"><div class="nav-icon">📋</div>Ledger</div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">Dashboard</div>
+  </div>
+
+  <!-- ADD EXPENSE -->
+  <div>
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+      <div class="screen">
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+
+        <div class="form-header">
+          <div class="back-btn">←</div>
+          <div class="form-title">Add Expense</div>
+        </div>
+
+        <div class="form-body">
+          <div class="amount-display">
+            <div class="amount-hint">How much?</div>
+            <div class="amount-value">$40.00<span class="amount-cursor">|</span></div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">Expense Name</div>
+            <div class="field-value">Whole Foods Run</div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">Paid By</div>
+            <div class="field-value">Timothy (You)</div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">Category</div>
+            <div class="category-chips">
+              <div class="cat-chip selected">🛒 Groceries</div>
+              <div class="cat-chip">🏠 Rent</div>
+              <div class="cat-chip">⚡ Utilities</div>
+              <div class="cat-chip">🍔 Food</div>
+              <div class="cat-chip">🌐 Internet</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">Split With</div>
+            <div style="margin-top:6px;">
+              <div class="split-row">
+                <div class="checkbox">✓</div>
+                <div class="split-avatar" style="background:#8b5cf6;">R</div>
+                <div class="split-name">Ruby</div>
+                <div class="split-share">$10.00</div>
+              </div>
+              <div class="split-row">
+                <div class="checkbox">✓</div>
+                <div class="split-avatar" style="background:#f59e0b;">J</div>
+                <div class="split-name">Jake</div>
+                <div class="split-share">$10.00</div>
+              </div>
+              <div class="split-row" style="border:none;">
+                <div class="checkbox unchecked"></div>
+                <div class="split-avatar" style="background:#ec4899;">M</div>
+                <div class="split-name">Mia</div>
+                <div class="split-share" style="color:#cbd5e1;">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="submit-btn">Add Expense →</div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">Add Expense</div>
+  </div>
+
+  <!-- BALANCES -->
+  <div>
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+      <div class="screen">
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+
+        <div class="balances-header">
+          <div style="font-size:16px;font-weight:700;">Balances</div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:2px;">4 roommates · 3 unsettled</div>
+        </div>
+
+        <div class="balances-summary">
+          <div class="summary-card owe">
+            <div class="label">You Owe</div>
+            <div class="amount">$38</div>
+          </div>
+          <div class="summary-card owed">
+            <div class="label">Owed to You</div>
+            <div class="amount">$142</div>
+          </div>
+        </div>
+
+        <!-- Balance items -->
+        <div class="balance-item">
+          <div class="bi-top">
+            <div class="bi-avatar" style="background:#8b5cf6;">R</div>
+            <div>
+              <div class="bi-name">Ruby</div>
+              <div class="bi-dir">owes you</div>
+            </div>
+            <div class="bi-amount green">$74.00</div>
+          </div>
+          <div class="bi-bar"><div class="bi-fill" style="width:74%;background:#10b981;"></div></div>
+          <div class="settle-btn">Mark as Settled</div>
+        </div>
+
+        <div class="balance-item">
+          <div class="bi-top">
+            <div class="bi-avatar" style="background:#f59e0b;">J</div>
+            <div>
+              <div class="bi-name">Jake</div>
+              <div class="bi-dir">owes you</div>
+            </div>
+            <div class="bi-amount green">$68.50</div>
+          </div>
+          <div class="bi-bar"><div class="bi-fill" style="width:68%;background:#10b981;"></div></div>
+          <div class="settle-btn">Mark as Settled</div>
+        </div>
+
+        <div class="balance-item">
+          <div class="bi-top">
+            <div class="bi-avatar" style="background:#ec4899;">M</div>
+            <div>
+              <div class="bi-name">Mia</div>
+              <div class="bi-dir">you owe</div>
+            </div>
+            <div class="bi-amount red">-$38.00</div>
+          </div>
+          <div class="bi-bar"><div class="bi-fill" style="width:38%;background:#ef4444;"></div></div>
+          <div class="settle-btn" style="background:#fef2f2;color:#ef4444;border-color:#fecaca;">Mark as Settled</div>
+        </div>
+
+        <div class="nav-bar">
+          <div class="nav-item"><div class="nav-icon">🏠</div>Home</div>
+          <div class="nav-item active"><div class="nav-icon">⚖️</div>Balances</div>
+          <div class="nav-item"><div class="nav-icon">📋</div>Ledger</div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">Balances</div>
+  </div>
+
+  <!-- LEDGER -->
+  <div>
+    <div class="phone">
+      <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+      <div class="screen">
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+
+        <div class="balances-header">
+          <div style="font-size:16px;font-weight:700;">Ledger</div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:2px;">All transactions</div>
+        </div>
+
+        <div class="search-bar">🔍 Search expenses...</div>
+
+        <div class="filter-row">
+          <div class="filter-chip active">All</div>
+          <div class="filter-chip">Groceries</div>
+          <div class="filter-chip">Utilities</div>
+          <div class="filter-chip">Food</div>
+          <div class="filter-chip">Rent</div>
+        </div>
+
+        <div class="ledger-group-label">Today</div>
+
+        <div class="ledger-row">
+          <div class="ledger-icon" style="background:#f0fdfa;">🛒</div>
+          <div>
+            <div class="ledger-name">Trader Joe's</div>
+            <div class="ledger-meta">Ruby paid · 4 people</div>
+          </div>
+          <div class="ledger-right">
+            <div class="ledger-amount red">-$15.25</div>
+            <div class="ledger-split">your share</div>
+            <div><span class="badge pending">Pending</span></div>
+          </div>
+        </div>
+
+        <div class="ledger-group-label">Yesterday</div>
+
+        <div class="ledger-row">
+          <div class="ledger-icon" style="background:#fef3c7;">⚡</div>
+          <div>
+            <div class="ledger-name">Electric Bill</div>
+            <div class="ledger-meta">You paid · 4 people</div>
+          </div>
+          <div class="ledger-right">
+            <div class="ledger-amount" style="color:#1a1a2e;">$112.00</div>
+            <div class="ledger-split">total</div>
+            <div><span class="badge pending">Pending</span></div>
+          </div>
+        </div>
+
+        <div class="ledger-group-label">May 28</div>
+
+        <div class="ledger-row">
+          <div class="ledger-icon" style="background:#fdf2f8;">🍕</div>
+          <div>
+            <div class="ledger-name">Domino's Pizza</div>
+            <div class="ledger-meta">Jake paid · 3 people</div>
+          </div>
+          <div class="ledger-right">
+            <div class="ledger-amount red">-$9.50</div>
+            <div class="ledger-split">your share</div>
+            <div><span class="badge settled">Settled</span></div>
+          </div>
+        </div>
+
+        <div class="ledger-row">
+          <div class="ledger-icon" style="background:#f0f9ff;">🌐</div>
+          <div>
+            <div class="ledger-name">Internet</div>
+            <div class="ledger-meta">You paid · 4 people</div>
+          </div>
+          <div class="ledger-right">
+            <div class="ledger-amount" style="color:#1a1a2e;">$80.00</div>
+            <div class="ledger-split">total</div>
+            <div><span class="badge settled">Settled</span></div>
+          </div>
+        </div>
+
+        <div class="nav-bar">
+          <div class="nav-item"><div class="nav-icon">🏠</div>Home</div>
+          <div class="nav-item"><div class="nav-icon">⚖️</div>Balances</div>
+          <div class="nav-item active"><div class="nav-icon">📋</div>Ledger</div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">Ledger</div>
+  </div>
+
+</div>
+
+</body>
+</html>

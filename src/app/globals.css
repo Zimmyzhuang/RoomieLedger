@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-bg: #FAF7F2;
+  --color-white: #FFFFFF;
+  --color-terracotta: #C0613A;
+  --color-terracotta-light: #E8845A;
+  --color-terracotta-dark: #9A4E2F;
+  --color-sage: #7A8B6F;
+  --color-sage-light: #A3B396;
+  --color-cream: #F5EDE3;
+  --color-cream-dark: #E8DDD0;
+  --color-ink: #2C2420;
+  --color-ink-light: #5C534D;
+  --color-ink-muted: #8A817A;
+  --color-border: #E2D9CF;
+
+  --shadow-card: 0 2px 24px rgba(44, 36, 32, 0.06);
+  --shadow-card-lg: 0 8px 48px rgba(44, 36, 32, 0.10);
+
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Source Sans 3', 'Segoe UI', sans-serif;
+
+  --animate-fade-up: fade-up 0.6s ease-out both;
+  --animate-fade-in: fade-in 0.5s ease-out both;
+  --animate-scale-in: scale-in 0.4s ease-out both;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-ink);
+  min-height: 100vh;
+}
+
+/* Subtle paper grain texture overlay */
+.grain::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px;
+}
+
+/* Spinner border width — Tailwind v4 doesn't have border-3 by default */
+.border-3 {
+  border-width: 3px;
+}

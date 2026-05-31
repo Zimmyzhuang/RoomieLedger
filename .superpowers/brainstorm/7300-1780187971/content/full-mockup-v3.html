@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RoomieLedger Mockup v3</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #dde3ea;
+    padding: 32px 24px 48px;
+    color: #1a1a2e;
+  }
+
+  h1 { font-size: 20px; font-weight: 800; color: #1a1a2e; text-align: center; margin-bottom: 6px; }
+  .page-subtitle { font-size: 13px; color: #64748b; text-align: center; margin-bottom: 36px; }
+
+  .screens {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 36px;
+    justify-content: center;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+  .phone {
+    width: 300px;
+    background: #fff;
+    border-radius: 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    overflow: hidden;
+    border: 7px solid #1a1a2e;
+  }
+
+  .notch {
+    background: #1a1a2e;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .notch-pill { background: #333; width: 56px; height: 11px; border-radius: 10px; }
+
+  /* Screen = flex column, fixed height so nav stays at bottom */
+  .screen {
+    background: #f8fafc;
+    height: 620px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .screen-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    background: #fff;
+    padding: 5px 14px;
+    border-radius: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+
+  /* STATUS BAR */
+  .status-bar {
+    background: #fff;
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 16px 5px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #1a1a2e;
+    flex-shrink: 0;
+  }
+
+  /* SCROLLABLE CONTENT AREA */
+  .scroll-area {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* BOTTOM NAV — fixed at bottom, never overlaps */
+  .bottom-nav {
+    background: #fff;
+    border-top: 1px solid #e8edf2;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0 16px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: visible;
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #94a3b8;
+    flex: 1;
+  }
+  .nav-item.active { color: #0d9488; }
+  /* invisible center placeholder keeps spacing even */
+  .nav-spacer { flex: 1; }
+
+  .nav-svg { width: 22px; height: 22px; }
+
+  /* FAB floats centered above the nav bar */
+  .fab {
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 50px;
+    background: #0d9488;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 4px 18px rgba(13,148,136,0.45);
+    z-index: 10;
+  }
+
+  .fab svg { width: 24px; height: 24px; }
+
+  /* ── TYPOGRAPHY ── */
+  .sec-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 10px 0 7px;
+  }
+
+  /* ── DASHBOARD ── */
+  .dash-hero {
+    background: linear-gradient(150deg, #0d9488 0%, #0f766e 100%);
+    padding: 14px 16px 28px;
+    flex-shrink: 0;
+  }
+  .dash-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .dash-greeting { color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 500; }
+  .dash-name { color: #fff; font-size: 16px; font-weight: 800; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.25); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; }
+
+  .hero-label { color: rgba(255,255,255,0.7); font-size: 11px; font-weight: 600; margin-bottom: 3px; }
+  .hero-amount { color: #fff; font-size: 34px; font-weight: 800; letter-spacing: -1.5px; line-height: 1; }
+  .hero-sub { color: rgba(255,255,255,0.75); font-size: 11px; margin-top: 4px; }
+
+  .dash-body { padding: 0 12px 12px; overflow: hidden; }
+
+  .chips { display: flex; gap: 8px; margin: 0 0 14px; margin-top: -16px; }
+  .chip {
+    flex: 1;
+    background: #fff;
+    border-radius: 14px;
+    padding: 10px 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.09);
+    text-align: center;
+  }
+  .chip-lbl { font-size: 9px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+  .chip-val { font-size: 16px; font-weight: 800; line-height: 1; }
+  .chip-val.red { color: #ef4444; }
+  .chip-val.green { color: #10b981; }
+  .chip-val.amber { color: #f59e0b; }
+
+  .txn-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.06);
+    margin-bottom: 7px;
+  }
+  .cat-icon-wrap {
+    width: 38px; height: 38px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .cat-icon-wrap svg { width: 20px; height: 20px; }
+
+  .txn-name { font-size: 13px; font-weight: 700; color: #1a1a2e; line-height: 1.2; }
+  .txn-meta { font-size: 10px; color: #94a3b8; font-weight: 500; margin-top: 2px; }
+  .txn-right { margin-left: auto; text-align: right; flex-shrink: 0; }
+  .txn-amount { font-size: 14px; font-weight: 800; line-height: 1.2; }
+  .txn-amount.red { color: #ef4444; }
+  .txn-amount.green { color: #10b981; }
+  .txn-payer { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+
+  /* ── ADD EXPENSE ── */
+  .modal-header {
+    background: #fff;
+    padding: 13px 16px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .back-btn { width: 32px; height: 32px; border-radius: 10px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; }
+  .back-btn svg { width: 18px; height: 18px; stroke: #475569; }
+  .modal-title { font-size: 16px; font-weight: 800; color: #1a1a2e; }
+
+  .form-scroll { flex: 1; overflow: hidden; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+
+  .amount-hero {
+    background: #fff;
+    border-radius: 18px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+  .amount-hint { font-size: 10px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
+  .amount-big { font-size: 36px; font-weight: 800; color: #0d9488; letter-spacing: -1.5px; }
+
+  .field { background: #fff; border-radius: 14px; padding: 10px 13px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .field-lbl { font-size: 9px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .field-val { font-size: 13px; color: #1a1a2e; font-weight: 600; }
+
+  .cat-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .cat-pill {
+    display: flex; align-items: center; gap: 4px;
+    padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    background: #f1f5f9; color: #64748b;
+  }
+  .cat-pill svg { width: 13px; height: 13px; }
+  .cat-pill.on { background: #f0fdfa; color: #0d9488; border: 1.5px solid #99f6e4; }
+
+  .split-person { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid #f8fafc; }
+  .split-person:last-child { border: none; }
+  .chk { width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .chk.on { background: #0d9488; }
+  .chk.off { background: #fff; border: 2px solid #cbd5e1; }
+  .chk svg { width: 11px; height: 11px; stroke: #fff; }
+  .person-av { width: 26px; height: 26px; border-radius: 50%; font-size: 10px; font-weight: 800; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .person-name { font-size: 12px; font-weight: 600; flex: 1; color: #1a1a2e; }
+  .person-share { font-size: 12px; font-weight: 700; color: #0d9488; }
+  .person-share.off { color: #cbd5e1; }
+
+  .cta-btn {
+    background: #0d9488; color: #fff; border-radius: 14px; padding: 13px;
+    text-align: center; font-size: 14px; font-weight: 800;
+    box-shadow: 0 4px 16px rgba(13,148,136,0.35);
+  }
+
+  /* ── BALANCES ── */
+  .page-hdr {
+    background: #fff; padding: 14px 16px 12px; border-bottom: 1px solid #f1f5f9; flex-shrink: 0;
+  }
+  .page-title-txt { font-size: 18px; font-weight: 800; color: #1a1a2e; }
+  .page-sub-txt { font-size: 11px; color: #94a3b8; font-weight: 500; margin-top: 2px; }
+
+  .bal-summary { display: flex; gap: 10px; padding: 12px 12px 4px; flex-shrink: 0; }
+  .bal-card { flex: 1; border-radius: 14px; padding: 12px; text-align: center; }
+  .bal-card.owe { background: #fef2f2; }
+  .bal-card.owed { background: #f0fdfa; }
+  .bal-lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
+  .bal-card.owe .bal-lbl { color: #ef4444; }
+  .bal-card.owed .bal-lbl { color: #0d9488; }
+  .bal-amt { font-size: 22px; font-weight: 800; }
+  .bal-card.owe .bal-amt { color: #ef4444; }
+  .bal-card.owed .bal-amt { color: #0d9488; }
+
+  .bal-list { flex: 1; overflow: hidden; padding: 8px 12px; display: flex; flex-direction: column; gap: 8px; }
+
+  .bal-item { background: #fff; border-radius: 16px; padding: 12px 14px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+  .bi-top { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+  .bi-av { width: 38px; height: 38px; border-radius: 50%; font-size: 15px; font-weight: 800; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .bi-info { flex: 1; }
+  .bi-name { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+  .bi-dir { font-size: 10px; font-weight: 600; margin-top: 1px; }
+  .bi-dir.green { color: #10b981; }
+  .bi-dir.red { color: #ef4444; }
+  .bi-dir.gray { color: #94a3b8; }
+  .bi-amount { font-size: 18px; font-weight: 800; }
+  .bi-amount.green { color: #10b981; }
+  .bi-amount.red { color: #ef4444; }
+  .bi-amount.gray { color: #94a3b8; }
+
+  .prog-bar { height: 5px; background: #f1f5f9; border-radius: 5px; overflow: hidden; margin-bottom: 10px; }
+  .prog-fill { height: 100%; border-radius: 5px; }
+
+  .settle-btn {
+    border-radius: 10px; padding: 8px 12px; text-align: center;
+    font-size: 11px; font-weight: 700; border: 1.5px solid;
+  }
+  .settle-btn.green { color: #0d9488; border-color: #99f6e4; background: #f0fdfa; }
+  .settle-btn.red { color: #ef4444; border-color: #fecaca; background: #fef2f2; }
+  .settle-btn.gray { color: #94a3b8; border-color: #e2e8f0; background: #f8fafc; }
+
+  /* ── LEDGER ── */
+  .search-bar {
+    margin: 10px 12px 0;
+    background: #fff; border-radius: 12px; padding: 9px 13px;
+    display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    font-size: 12px; color: #cbd5e1; font-weight: 500;
+    flex-shrink: 0;
+  }
+  .search-bar svg { width: 15px; height: 15px; stroke: #cbd5e1; flex-shrink: 0; }
+
+  .filter-row { display: flex; gap: 6px; padding: 8px 12px 4px; flex-shrink: 0; }
+  .f-chip { padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: 700; background: #f1f5f9; color: #64748b; white-space: nowrap; }
+  .f-chip.on { background: #0d9488; color: #fff; }
+
+  .ledger-scroll { flex: 1; overflow: hidden; padding: 4px 0; }
+  .date-grp { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; padding: 6px 12px 3px; }
+
+  .ledger-row {
+    background: #fff; margin: 0 12px 6px; border-radius: 14px;
+    padding: 10px 12px; display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.06);
+  }
+  .l-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .l-icon svg { width: 18px; height: 18px; }
+  .l-name { font-size: 12px; font-weight: 700; color: #1a1a2e; }
+  .l-meta { font-size: 10px; color: #94a3b8; font-weight: 500; margin-top: 1px; }
+  .l-right { margin-left: auto; text-align: right; flex-shrink: 0; }
+  .l-amt { font-size: 13px; font-weight: 800; }
+  .l-amt.red { color: #ef4444; }
+  .l-amt.green { color: #10b981; }
+  .l-share { font-size: 10px; color: #94a3b8; }
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 20px; font-size: 9px; font-weight: 700; margin-top: 2px; }
+  .badge.settled { background: #f0fdf4; color: #16a34a; }
+  .badge.pending { background: #fffbeb; color: #d97706; }
+
+  /* ── TRANSACTION DETAIL SHEET ── */
+  .sheet-overlay { position: absolute; inset: 0; background: rgba(15,23,42,0.4); z-index: 10; }
+  .sheet {
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 20;
+    background: #fff; border-radius: 22px 22px 0 0;
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
+  }
+  .sheet-handle { width: 36px; height: 4px; background: #e2e8f0; border-radius: 4px; margin: 10px auto 14px; }
+  .sheet-ttl { font-size: 16px; font-weight: 800; color: #1a1a2e; padding: 0 16px 12px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 8px; }
+  .sheet-ttl .s-icon { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; }
+  .sheet-ttl .s-icon svg { width: 17px; height: 17px; }
+  .sheet-amount { font-size: 30px; font-weight: 800; color: #1a1a2e; padding: 12px 16px 2px; }
+  .sheet-meta { font-size: 11px; color: #94a3b8; font-weight: 500; padding: 0 16px 12px; border-bottom: 1px solid #f1f5f9; }
+
+  .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 16px; border-bottom: 1px solid #f8fafc; }
+  .detail-lbl { font-size: 11px; color: #94a3b8; font-weight: 600; }
+  .detail-val { font-size: 12px; color: #1a1a2e; font-weight: 700; }
+
+  .participant-row { display: flex; align-items: center; gap: 8px; padding: 8px 16px; }
+  .p-av { width: 28px; height: 28px; border-radius: 50%; font-size: 10px; font-weight: 800; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .p-name { font-size: 12px; font-weight: 600; flex: 1; color: #1a1a2e; }
+  .p-share { font-size: 12px; font-weight: 800; color: #1a1a2e; }
+  .p-status { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 20px; margin-left: 6px; }
+  .p-status.paid { background: #f0fdf4; color: #16a34a; }
+  .p-status.owes { background: #fffbeb; color: #d97706; }
+  .p-status.settled { background: #f0fdfa; color: #0d9488; }
+
+  /* ── EMPTY STATE ── */
+  .empty-body {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 24px; text-align: center; gap: 12px;
+  }
+  .empty-icon { width: 72px; height: 72px; background: #f0fdfa; border-radius: 22px; display: flex; align-items: center; justify-content: center; }
+  .empty-icon svg { width: 36px; height: 36px; stroke: #0d9488; }
+  .empty-ttl { font-size: 17px; font-weight: 800; color: #1a1a2e; }
+  .empty-sub { font-size: 12px; color: #94a3b8; font-weight: 500; line-height: 1.55; max-width: 200px; }
+  .empty-cta { background: #0d9488; color: #fff; border-radius: 14px; padding: 12px 24px; font-size: 13px; font-weight: 800; margin-top: 4px; display: flex; align-items: center; gap: 6px; }
+  .empty-cta svg { width: 16px; height: 16px; stroke: #fff; }
+</style>
+</head>
+<body>
+
+<h1>RoomieLedger — Mockup v3</h1>
+<p class="page-subtitle">Mobile web · Style B · Teal · SVG icons · Fixed nav</p>
+
+<div class="screens">
+
+  <!-- ════════ DASHBOARD ════════ -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="notch"><div class="notch-pill"></div></div>
+      <div class="screen">
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+
+        <div class="scroll-area">
+          <div class="dash-hero">
+            <div class="dash-top">
+              <div>
+                <div class="dash-greeting">Good morning 👋</div>
+                <div class="dash-name">Timothy</div>
+              </div>
+              <div class="avatar">T</div>
+            </div>
+            <div class="hero-label">Net balance</div>
+            <div class="hero-amount">+$104.50</div>
+            <div class="hero-sub">across 4 roommates</div>
+          </div>
+
+          <div class="dash-body">
+            <div class="chips">
+              <div class="chip">
+                <div class="chip-lbl">You Owe</div>
+                <div class="chip-val red">$38</div>
+              </div>
+              <div class="chip">
+                <div class="chip-lbl">Owed to You</div>
+                <div class="chip-val green">$142</div>
+              </div>
+              <div class="chip">
+                <div class="chip-lbl">Unsettled</div>
+                <div class="chip-val amber">3</div>
+              </div>
+            </div>
+
+            <div class="sec-title">Recent Activity</div>
+
+            <div class="txn-card">
+              <div class="cat-icon-wrap" style="background:#f0fdfa;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+              </div>
+              <div>
+                <div class="txn-name">Trader Joe's</div>
+                <div class="txn-meta">Today · Groceries</div>
+              </div>
+              <div class="txn-right">
+                <div class="txn-amount red">-$15.25</div>
+                <div class="txn-payer">Ruby paid</div>
+              </div>
+            </div>
+
+            <div class="txn-card">
+              <div class="cat-icon-wrap" style="background:#fef3c7;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+              <div>
+                <div class="txn-name">Electric Bill</div>
+                <div class="txn-meta">Yesterday · Utilities</div>
+              </div>
+              <div class="txn-right">
+                <div class="txn-amount green">+$56.00</div>
+                <div class="txn-payer">You paid</div>
+              </div>
+            </div>
+
+            <div class="txn-card">
+              <div class="cat-icon-wrap" style="background:#fdf2f8;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+              </div>
+              <div>
+                <div class="txn-name">Domino's</div>
+                <div class="txn-meta">May 28 · Food</div>
+              </div>
+              <div class="txn-right">
+                <div class="txn-amount red">-$9.50</div>
+                <div class="txn-payer">Jake paid</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-item active">
+            <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Home
+          </div>
+          <div class="nav-spacer"></div>
+            <div class="fab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+          <div class="nav-item">
+            <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Ledger
+          </div>
+          <div class="nav-item">
+            <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            Balances
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">Dashboard</div>
+  </div>
+
+  <!-- ════════ ADD EXPENSE ════════ -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="notch"><div class="notch-pill"></div></div>
+      <div class="screen">
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+
+        <div class="modal-header">
+          <div class="back-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;stroke:#475569;"><polyline points="15 18 9 12 15 6"/></svg>
+          </div>
+          <div class="modal-title">Add Expense</div>
+        </div>
+
+        <div class="form-scroll">
+          <div class="amount-hero">
+            <div class="amount-hint">How much?</div>
+            <div class="amount-big">$40.00</div>
+          </div>
+
+          <div class="field">
+            <div class="field-lbl">Title</div>
+            <div class="field-val">Whole Foods Run</div>
+          </div>
+
+          <div class="field">
+            <div class="field-lbl">Paid By</div>
+            <div class="field-val">Timothy (You)</div>
+          </div>
+
+          <div class="field">
+            <div class="field-lbl">Category</div>
+            <div class="cat-pills">
+              <div class="cat-pill on">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                Groceries
+              </div>
+              <div class="cat-pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Utilities
+              </div>
+              <div class="cat-pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/></svg>
+                Food
+              </div>
+              <div class="cat-pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                Rent
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-lbl">Split With — equal · $10.00 each</div>
+            <div style="margin-top:7px;">
+              <div class="split-person">
+                <div class="chk on"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div class="person-av" style="background:#8b5cf6;">R</div>
+                <div class="person-name">Ruby</div>
+                <div class="person-share">$10.00</div>
+              </div>
+              <div class="split-person">
+                <div class="chk on"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div class="person-av" style="background:#f59e0b;">J</div>
+                <div class="person-name">Jake</div>
+                <div class="person-share">$10.00</div>
+              </div>
+              <div class="split-person">
+                <div class="chk off"></div>
+                <div class="person-av" style="background:#ec4899;">M</div>
+                <div class="person-name">Mia</div>
+                <div class="person-share off">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cta-btn">Add Expense</div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">Add Expense</div>
+  </div>
+
+  <!-- ════════ BALANCES ════════ -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="notch"><div class="notch-pill"></div></div>
+      <div class="screen">
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+
+        <div class="page-hdr">
+          <div class="page-title-txt">Balances</div>
+          <div class="page-sub-txt">4 roommates · 3 unsettled</div>
+        </div>
+
+        <div class="bal-summary">
+          <div class="bal-card owe">
+            <div class="bal-lbl">You Owe</div>
+            <div class="bal-amt">$38.00</div>
+          </div>
+          <div class="bal-card owed">
+            <div class="bal-lbl">Owed to You</div>
+            <div class="bal-amt">$142.50</div>
+          </div>
+        </div>
+
+        <div class="bal-list">
+          <div class="bal-item">
+            <div class="bi-top">
+              <div class="bi-av" style="background:#8b5cf6;">R</div>
+              <div class="bi-info">
+                <div class="bi-name">Ruby</div>
+                <div class="bi-dir green">Owes you</div>
+              </div>
+              <div class="bi-amount green">$74.00</div>
+            </div>
+            <div class="prog-bar"><div class="prog-fill" style="width:74%;background:#10b981;"></div></div>
+            <div class="settle-btn green">Mark as Settled</div>
+          </div>
+
+          <div class="bal-item">
+            <div class="bi-top">
+              <div class="bi-av" style="background:#f59e0b;">J</div>
+              <div class="bi-info">
+                <div class="bi-name">Jake</div>
+                <div class="bi-dir green">Owes you</div>
+              </div>
+              <div class="bi-amount green">$68.50</div>
+            </div>
+            <div class="prog-bar"><div class="prog-fill" style="width:68%;background:#10b981;"></div></div>
+            <div class="settle-btn green">Mark as Settled</div>
+          </div>
+
+          <div class="bal-item">
+            <div class="bi-top">
+              <div class="bi-av" style="background:#ec4899;">M</div>
+              <div class="bi-info">
+                <div class="bi-name">Mia</div>
+                <div class="bi-dir red">You owe</div>
+              </div>
+              <div class="bi-amount red">$38.00</div>
+            </div>
+            <div class="prog-bar"><div class="prog-fill" style="width:38%;background:#ef4444;"></div></div>
+            <div class="settle-btn red">Mark as Settled</div>
+          </div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-item">
+            <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Home
+          </div>
+          <div class="nav-spacer"></div>
+            <div class="fab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+          <div class="nav-item">
+            <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Ledger
+          </div>
+          <div class="nav-item active">
+            <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            Balances
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">Balances</div>
+  </div>
+
+  <!-- ════════ LEDGER ════════ -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="notch"><div class="notch-pill"></div></div>
+      <div class="screen">
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+
+        <div class="page-hdr">
+          <div class="page-title-txt">Ledger</div>
+          <div class="page-sub-txt">All transactions</div>
+        </div>
+
+        <div class="search-bar">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;stroke:#cbd5e1;flex-shrink:0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Search expenses...
+        </div>
+
+        <div class="filter-row">
+          <div class="f-chip on">All</div>
+          <div class="f-chip">Groceries</div>
+          <div class="f-chip">Utilities</div>
+          <div class="f-chip">Food</div>
+          <div class="f-chip">Rent</div>
+        </div>
+
+        <div class="ledger-scroll">
+          <div class="date-grp">Today</div>
+          <div class="ledger-row">
+            <div class="l-icon" style="background:#f0fdfa;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            </div>
+            <div>
+              <div class="l-name">Trader Joe's</div>
+              <div class="l-meta">Ruby paid · 4 people</div>
+            </div>
+            <div class="l-right">
+              <div class="l-amt red">-$15.25</div>
+              <div class="l-share">your share</div>
+              <div class="badge pending">Pending</div>
+            </div>
+          </div>
+
+          <div class="date-grp">Yesterday</div>
+          <div class="ledger-row">
+            <div class="l-icon" style="background:#fef3c7;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div>
+              <div class="l-name">Electric Bill</div>
+              <div class="l-meta">You paid · 4 people</div>
+            </div>
+            <div class="l-right">
+              <div class="l-amt green">+$56.00</div>
+              <div class="l-share">you get back</div>
+              <div class="badge pending">Pending</div>
+            </div>
+          </div>
+
+          <div class="date-grp">May 28</div>
+          <div class="ledger-row">
+            <div class="l-icon" style="background:#fdf2f8;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+            </div>
+            <div>
+              <div class="l-name">Domino's Pizza</div>
+              <div class="l-meta">Jake paid · 3 people</div>
+            </div>
+            <div class="l-right">
+              <div class="l-amt red">-$9.50</div>
+              <div class="l-share">your share</div>
+              <div class="badge settled">Settled</div>
+            </div>
+          </div>
+
+          <div class="ledger-row">
+            <div class="l-icon" style="background:#f0f9ff;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <div>
+              <div class="l-name">Internet</div>
+              <div class="l-meta">You paid · 4 people</div>
+            </div>
+            <div class="l-right">
+              <div class="l-amt green">+$60.00</div>
+              <div class="l-share">you get back</div>
+              <div class="badge settled">Settled</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-item">
+            <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Home
+          </div>
+          <div class="nav-spacer"></div>
+            <div class="fab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+          <div class="nav-item active">
+            <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Ledger
+          </div>
+          <div class="nav-item">
+            <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            Balances
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">Ledger</div>
+  </div>
+
+  <!-- ════════ TRANSACTION DETAIL SHEET ════════ -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="notch"><div class="notch-pill"></div></div>
+      <div class="screen">
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+
+        <!-- dimmed background -->
+        <div style="flex:1;padding:10px 12px;background:#f8fafc;opacity:0.3;pointer-events:none;">
+          <div class="ledger-row" style="margin:0 0 6px;">
+            <div class="l-icon" style="background:#f0fdfa;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            </div>
+            <div><div class="l-name">Trader Joe's</div><div class="l-meta">Ruby paid</div></div>
+            <div class="l-right"><div class="l-amt red">-$15.25</div></div>
+          </div>
+          <div class="ledger-row" style="margin:0;">
+            <div class="l-icon" style="background:#fef3c7;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div><div class="l-name">Electric Bill</div><div class="l-meta">You paid</div></div>
+            <div class="l-right"><div class="l-amt green">+$56.00</div></div>
+          </div>
+        </div>
+
+        <div class="sheet-overlay"></div>
+        <div class="sheet">
+          <div class="sheet-handle"></div>
+          <div class="sheet-ttl">
+            <div class="s-icon" style="background:#fef3c7;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            Electric Bill
+          </div>
+          <div class="sheet-amount">$112.00</div>
+          <div class="sheet-meta">You paid · May 29, 2026 · Utilities</div>
+
+          <div class="detail-row">
+            <span class="detail-lbl">Paid by</span>
+            <span class="detail-val">Timothy (You)</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-lbl">Split</span>
+            <span class="detail-val">Equal · $28.00 each</span>
+          </div>
+          <div class="detail-row" style="border:none;padding-bottom:4px;">
+            <span class="detail-lbl">Participants</span>
+          </div>
+
+          <div class="participant-row">
+            <div class="p-av" style="background:#0d9488;">T</div>
+            <div class="p-name">Timothy</div>
+            <div class="p-share">$28.00</div>
+            <div class="p-status paid">PAID</div>
+          </div>
+          <div class="participant-row">
+            <div class="p-av" style="background:#8b5cf6;">R</div>
+            <div class="p-name">Ruby</div>
+            <div class="p-share">$28.00</div>
+            <div class="p-status owes">OWES</div>
+          </div>
+          <div class="participant-row">
+            <div class="p-av" style="background:#f59e0b;">J</div>
+            <div class="p-name">Jake</div>
+            <div class="p-share">$28.00</div>
+            <div class="p-status owes">OWES</div>
+          </div>
+          <div class="participant-row">
+            <div class="p-av" style="background:#ec4899;">M</div>
+            <div class="p-name">Mia</div>
+            <div class="p-share">$28.00</div>
+            <div class="p-status settled">SETTLED</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">Transaction Detail</div>
+  </div>
+
+  <!-- ════════ EMPTY STATE ════════ -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="notch"><div class="notch-pill"></div></div>
+      <div class="screen">
+        <div class="status-bar"><span>9:41</span><span>●●● 100%</span></div>
+
+        <div class="dash-hero" style="padding-bottom:22px;">
+          <div class="dash-top">
+            <div>
+              <div class="dash-greeting">Good morning 👋</div>
+              <div class="dash-name">Timothy</div>
+            </div>
+            <div class="avatar">T</div>
+          </div>
+          <div class="hero-label">Net balance</div>
+          <div class="hero-amount">$0.00</div>
+          <div class="hero-sub">no expenses yet</div>
+        </div>
+
+        <div class="empty-body">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          </div>
+          <div class="empty-ttl">No expenses yet</div>
+          <div class="empty-sub">Tap the + button to add your first shared expense and start splitting with roommates.</div>
+          <div class="empty-cta">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add First Expense
+          </div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-item active">
+            <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Home
+          </div>
+          <div class="nav-spacer"></div>
+            <div class="fab">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+          <div class="nav-item">
+            <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Ledger
+          </div>
+          <div class="nav-item">
+            <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            Balances
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-label">Empty State</div>
+  </div>
+
+</div>
+</body>
+</html>
